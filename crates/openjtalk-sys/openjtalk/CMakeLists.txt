@@ -13,8 +13,7 @@ target_compile_options(
   openjtalk
   PRIVATE $<$<CXX_COMPILER_ID:MSVC>:
           /W4
-          /O2
-          /utf-8>
+          /O2>
           $<$<CXX_COMPILER_ID:GNU>:
           -Wall
           -Wextra
