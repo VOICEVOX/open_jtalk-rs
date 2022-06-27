@@ -21,18 +21,43 @@ fn generate_bindings(include_dir: impl AsRef<Path>) {
     let bindings = bindgen::Builder::default()
         .header("wrapper.hpp")
         .allowlist_recursively(true)
-        .allowlist_file("mecab.h")
-        .allowlist_file("njd.h")
-        .allowlist_file("jpcommon.h")
-        .allowlist_file("njd2jpcommon.h")
-        .allowlist_file("njd_set_accent_phrase.h")
-        .allowlist_file("njd_set_accent_type.h")
-        .allowlist_file("njd_set_digit.h")
-        .allowlist_file("njd_set_long_vowel.h")
-        .allowlist_file("njd_set_pronunciation.h")
-        .allowlist_file("njd_set_unvoiced_vowel.h")
-        .allowlist_file("text2mecab.h")
-        .allowlist_file("mecab2njd.h")
+        .allowlist_file(include_dir.join("mecab.h").display().to_string())
+        .allowlist_file(include_dir.join("njd.h").display().to_string())
+        .allowlist_file(include_dir.join("jpcommon.h").display().to_string())
+        .allowlist_file(include_dir.join("njd2jpcommon.h").display().to_string())
+        .allowlist_file(
+            include_dir
+                .join("njd_set_accent_phrase.h")
+                .display()
+                .to_string(),
+        )
+        .allowlist_file(
+            include_dir
+                .join("njd_set_accent_type.h")
+                .display()
+                .to_string(),
+        )
+        .allowlist_file(include_dir.join("njd_set_digit.h").display().to_string())
+        .allowlist_file(
+            include_dir
+                .join("njd_set_long_vowel.h")
+                .display()
+                .to_string(),
+        )
+        .allowlist_file(
+            include_dir
+                .join("njd_set_pronunciation.h")
+                .display()
+                .to_string(),
+        )
+        .allowlist_file(
+            include_dir
+                .join("njd_set_unvoiced_vowel.h")
+                .display()
+                .to_string(),
+        )
+        .allowlist_file(include_dir.join("text2mecab.h").display().to_string())
+        .allowlist_file(include_dir.join("mecab2njd.h").display().to_string())
         .clang_args(clang_args)
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         .size_t_is_usize(true)
