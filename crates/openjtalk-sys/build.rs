@@ -18,26 +18,23 @@ fn generate_bindings(include_dir: impl AsRef<Path>) {
     let clang_args = &[format!("-I{}", include_dir.display())];
     println!("cargo:rerun-if-changed=wrapper.hpp");
     println!("cargo:rerun-if-changed=src/generated/bindings.rs");
-    let bindings = bindgen::Builder::default()
+    let mut bind_builder = bindgen::Builder::default()
         .header("wrapper.hpp")
         .allowlist_recursively(true)
-        .allowlist_file(".*mecab\\.h")
-        .allowlist_file(".*njd\\.h")
-        .allowlist_file(".*jpcommon\\.h")
-        .allowlist_file(".*njd2jpcommon\\.h")
-        .allowlist_file(".*njd_set_accent_phrase\\.h")
-        .allowlist_file(".*njd_set_accent_type\\.h")
-        .allowlist_file(".*njd_set_digit\\.h")
-        .allowlist_file(".*njd_set_long_vowel\\.h")
-        .allowlist_file(".*njd_set_pronunciation\\.h")
-        .allowlist_file(".*njd_set_unvoiced_vowel\\.h")
-        .allowlist_file(".*text2mecab\\.h")
-        .allowlist_file(".*mecab2njd\\.h")
         .clang_args(clang_args)
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         .size_t_is_usize(true)
         .rustfmt_bindings(true)
-        .rustified_enum("*")
+        .rustified_enum("*");
+    let paths = std::fs::read_dir(&include_dir).unwrap();
+    for path in paths {
+        let path = path.unwrap();
+        let file_name = path.file_name().to_str().unwrap().to_string();
+        bind_builder =
+            bind_builder.allowlist_file(format!(".*{}", file_name.replace(".h", "\\.h")));
+    }
+
+    let bindings = bind_builder
         .generate()
         .expect("Unable to generate bindings");
     let generated_file = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap())
