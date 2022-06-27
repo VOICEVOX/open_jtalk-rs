@@ -1,0 +1,34 @@
+name: gen_bind
+on:
+  push:
+    paths:
+      - "crates/openjtalk-sys/openjtalk/src/*"
+      - "crates/openjtalk-sys/openjtalk/CMakeLists.txt"
+      - "crates/openjtalk-sys/build.rs"
+      - ".github/workflows/gen_bind.yml"
+      - ".github/actions/auto_gen_bind_pr/action.yml"
+jobs:
+  generate_bind:
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - os: windows-latest
+            triple: x86_64-pc-windows-msvc
+          - os: windows-latest
+            triple: i686-pc-windows-msvc
+          - os: ubuntu-latest
+            triple: x86_64-unknown-linux-gnu
+          - os: macos-latest
+            triple: x86_64-apple-darwin
+          - os: macos-latest
+            triple: aarch64-apple-darwin
+    runs-on: ${{ matrix.target.os }}
+    steps:
+      - uses: lukka/get-cmake@v3.23.0
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+      - uses: ./.github/actions/auto_gen_bind_pr
+        with:
+          triple: ${{ matrix.target.triple }}
