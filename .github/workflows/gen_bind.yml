@@ -2,6 +2,7 @@ name: gen_bind
 on:
   push:
     paths:
+      - "crates/openjtalk-sys/wrapper.hpp"
       - "crates/openjtalk-sys/openjtalk/src/*"
       - "crates/openjtalk-sys/openjtalk/CMakeLists.txt"
       - "crates/openjtalk-sys/build.rs"
