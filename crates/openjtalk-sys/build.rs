@@ -21,33 +21,7 @@ fn generate_bindings(include_dir: impl AsRef<Path>) {
     let bindings = bindgen::Builder::default()
         .header("wrapper.hpp")
         .allowlist_recursively(true)
-        .allowlist_file(include_dir.join("mecab.h").to_str().unwrap())
-        .allowlist_file(include_dir.join("njd.h").to_str().unwrap())
-        .allowlist_file(include_dir.join("jpcommon.h").to_str().unwrap())
-        .allowlist_file(include_dir.join("njd2jpcommon.h").to_str().unwrap())
-        .allowlist_file(
-            include_dir
-                .join("njd_set_accent_phrase.h")
-                .to_str()
-                .unwrap(),
-        )
-        .allowlist_file(include_dir.join("njd_set_accent_type.h").to_str().unwrap())
-        .allowlist_file(include_dir.join("njd_set_digit.h").to_str().unwrap())
-        .allowlist_file(include_dir.join("njd_set_long_vowel.h").to_str().unwrap())
-        .allowlist_file(
-            include_dir
-                .join("njd_set_pronunciation.h")
-                .to_str()
-                .unwrap(),
-        )
-        .allowlist_file(
-            include_dir
-                .join("njd_set_unvoiced_vowel.h")
-                .to_str()
-                .unwrap(),
-        )
-        .allowlist_file(include_dir.join("text2mecab.h").to_str().unwrap())
-        .allowlist_file(include_dir.join("mecab2njd.h").to_str().unwrap())
+        .allowlist_file("wrapper.hpp")
         .clang_args(clang_args)
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         .size_t_is_usize(true)
