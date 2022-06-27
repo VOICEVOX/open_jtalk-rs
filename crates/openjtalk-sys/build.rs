@@ -10,7 +10,7 @@ fn main() {
 #[cfg(not(feature = "generate-bindings"))]
 fn generate_bindings(#[allow(unused_variables)] include_dir: impl AsRef<Path>) {}
 
-//#[cfg(feature = "generate-bindings")]
+#[cfg(feature = "generate-bindings")]
 fn generate_bindings(include_dir: impl AsRef<Path>) {
     use std::env;
     use std::path::PathBuf;
@@ -20,10 +20,8 @@ fn generate_bindings(include_dir: impl AsRef<Path>) {
     println!("cargo:rerun-if-changed=src/generated/bindings.rs");
     let bindings = bindgen::Builder::default()
         .header("wrapper.hpp")
-        .blocklist_file("winnt.h")
-        .blocklist_file("cstdio")
-        .blocklist_file("stdio.h")
-        .blocklist_file("windows.h")
+        .allowlist_recursively(true)
+        .allowlist_function("text2mecab")
         .clang_args(clang_args)
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         .size_t_is_usize(true)
