@@ -1,7 +1,6 @@
-#include <jpcommon.h>;
 #include <mecab.h>;
-#include <mecab2njd.h>;
 #include <njd.h>;
+#include <jpcommon.h>;
 #include <njd2jpcommon.h>;
 #include <njd_set_accent_phrase.h>;
 #include <njd_set_accent_type.h>;
@@ -10,3 +9,4 @@
 #include <njd_set_pronunciation.h>;
 #include <njd_set_unvoiced_vowel.h>;
 #include <text2mecab.h>;
+#include <mecab2njd.h>;
