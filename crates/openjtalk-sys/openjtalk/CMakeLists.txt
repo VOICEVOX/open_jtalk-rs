@@ -9,6 +9,17 @@ FetchContent_Declare(
   SOURCE_SUBDIR src)
 FetchContent_MakeAvailable(openjtalk)
 
+target_compile_options(
+  openjtalk
+  PRIVATE $<$<CXX_COMPILER_ID:MSVC>:
+          /W4
+          /O2
+          /utf-8>
+          $<$<CXX_COMPILER_ID:GNU>:
+          -Wall
+          -Wextra
+          -O2>)
+
 install(TARGETS openjtalk LIBRARY DESTINATION lib)
 install(
   FILES
