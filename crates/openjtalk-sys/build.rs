@@ -10,7 +10,7 @@ fn main() {
 #[cfg(not(feature = "generate-bindings"))]
 fn generate_bindings(#[allow(unused_variables)] include_dir: impl AsRef<Path>) {}
 
-#[cfg(feature = "generate-bindings")]
+//#[cfg(feature = "generate-bindings")]
 fn generate_bindings(include_dir: impl AsRef<Path>) {
     use std::env;
     use std::path::PathBuf;
@@ -20,19 +20,11 @@ fn generate_bindings(include_dir: impl AsRef<Path>) {
     println!("cargo:rerun-if-changed=src/generated/bindings.rs");
     let bindings = bindgen::Builder::default()
         .header("wrapper.hpp")
+        .blocklist_file("winnt.h")
+        .blocklist_file("cstdio")
+        .blocklist_file("stdio.h")
+        .blocklist_file("windows.h")
         .clang_args(clang_args)
-        .blocklist_type("IMAGE_TLS_DIRECTORY")
-        .blocklist_type("IMAGE_TLS_DIRECTORY64")
-        .blocklist_type("_IMAGE_TLS_DIRECTORY32")
-        .blocklist_type("IMAGE_TLS_DIRECTORY32")
-        .blocklist_type("PIMAGE_TLS_DIRECTORY")
-        .blocklist_type("PIMAGE_TLS_DIRECTORY32")
-        .blocklist_type("_IMAGE_TLS_DIRECTORY32__bindgen_ty_1__bindgen_ty_1")
-        .blocklist_type("_IMAGE_TLS_DIRECTORY32__bindgen_ty_1")
-        .blocklist_type("PIMAGE_TLS_DIRECTORY64")
-        .blocklist_type("_IMAGE_TLS_DIRECTORY64")
-        .blocklist_type("_IMAGE_TLS_DIRECTORY64__bindgen_ty_1")
-        .blocklist_type("_IMAGE_TLS_DIRECTORY64__bindgen_ty_1__bindgen_ty_1")
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         .size_t_is_usize(true)
         .rustfmt_bindings(true)
