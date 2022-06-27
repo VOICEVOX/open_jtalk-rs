@@ -10,7 +10,7 @@ fn main() {
 #[cfg(not(feature = "generate-bindings"))]
 fn generate_bindings(#[allow(unused_variables)] include_dir: impl AsRef<Path>) {}
 
-#[cfg(feature = "generate-bindings")]
+//#[cfg(feature = "generate-bindings")]
 fn generate_bindings(include_dir: impl AsRef<Path>) {
     use std::env;
     use std::path::PathBuf;
@@ -21,7 +21,18 @@ fn generate_bindings(include_dir: impl AsRef<Path>) {
     let bindings = bindgen::Builder::default()
         .header("wrapper.hpp")
         .allowlist_recursively(true)
-        .allowlist_function("text2mecab")
+        .allowlist_file("mecab.h")
+        .allowlist_file("njd.h")
+        .allowlist_file("jpcommon.h")
+        .allowlist_file("njd2jpcommon.h")
+        .allowlist_file("njd_set_accent_phrase.h")
+        .allowlist_file("njd_set_accent_type.h")
+        .allowlist_file("njd_set_digit.h")
+        .allowlist_file("njd_set_long_vowel.h")
+        .allowlist_file("njd_set_pronunciation.h")
+        .allowlist_file("njd_set_unvoiced_vowel.h")
+        .allowlist_file("text2mecab.h")
+        .allowlist_file("mecab2njd.h")
         .clang_args(clang_args)
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         .size_t_is_usize(true)
