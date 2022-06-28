@@ -28,7 +28,7 @@ pub fn text2mecab(text: impl AsRef<str>) -> Result<String, Text2MecabError> {
     if result == openjtalk_sys::text2mecab_result_t::TEXT2MECAB_RESULT_SUCCESS {
         unsafe {
             output_vec.set_len(
-                CStr::from_bytes_with_nul_unchecked(output_vec)
+                CStr::from_ptr(output_vec.as_ptr() as *const i8)
                     .to_bytes()
                     .len(),
             )
@@ -38,4 +38,9 @@ pub fn text2mecab(text: impl AsRef<str>) -> Result<String, Text2MecabError> {
     } else {
         Err(unsafe { std::mem::transmute(result) })
     }
+}
+
+#[inline]
+fn bool_number_to_bool(bool_number: i32) -> bool {
+    bool_number == openjtalk_sys::TRUE as i32
 }
