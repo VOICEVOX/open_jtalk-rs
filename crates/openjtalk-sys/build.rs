@@ -1,6 +1,12 @@
-use std::path::Path;
+use std::{env, path::Path};
 fn main() {
-    let dst_dir = cmake::build("openjtalk");
+    let mut cmake_conf = cmake::Config::new("openjtalk");
+    let debug = env::var("DEBUG").is_ok();
+    if debug {
+        cmake_conf.profile("Release");
+    }
+
+    let dst_dir = cmake_conf.build();
     let lib_dir = dst_dir.join("lib");
     println!("cargo:rustc-link-search=native={}", lib_dir.display());
     println!("cargo:rustc-link-lib=static=openjtalk");
@@ -10,9 +16,8 @@ fn main() {
 #[cfg(not(feature = "generate-bindings"))]
 fn generate_bindings(#[allow(unused_variables)] include_dir: impl AsRef<Path>) {}
 
-//#[cfg(feature = "generate-bindings")]
+#[cfg(feature = "generate-bindings")]
 fn generate_bindings(include_dir: impl AsRef<Path>) {
-    use std::env;
     use std::path::PathBuf;
     let include_dir = include_dir.as_ref();
     let clang_args = &[format!("-I{}", include_dir.display())];
