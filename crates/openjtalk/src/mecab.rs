@@ -19,7 +19,7 @@ impl Default for Mecab {
 
 impl Mecab {
     unsafe fn as_raw_ptr(&mut self) -> *mut openjtalk_sys::Mecab {
-        unsafe { &mut self.0 as *mut openjtalk_sys::Mecab }
+        &mut self.0 as *mut openjtalk_sys::Mecab
     }
     pub fn initialize(&mut self) -> bool {
         unsafe { bool_number_to_bool(openjtalk_sys::Mecab_initialize(self.as_raw_ptr())) }
