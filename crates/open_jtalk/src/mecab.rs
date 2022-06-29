@@ -35,11 +35,8 @@ impl Mecab {
         }
     }
 
-    pub fn get_feature(&mut self) -> &mut MecabFeature {
-        #[allow(clippy::transmute_ptr_to_ref)]
-        unsafe {
-            std::mem::transmute(open_jtalk_sys::Mecab_get_feature(self.as_raw_ptr()))
-        }
+    pub fn get_feature_mut(&mut self) -> &mut MecabFeature {
+        unsafe { &mut *(open_jtalk_sys::Mecab_get_feature(self.as_raw_ptr()) as *mut MecabFeature) }
     }
 
     pub fn analysis(&mut self, str: impl AsRef<str>) -> bool {

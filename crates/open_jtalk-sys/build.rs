@@ -2,6 +2,7 @@ use std::{env, path::Path};
 fn main() {
     let mut cmake_conf = cmake::Config::new("open_jtalk");
     let debug = env::var("DEBUG").is_ok();
+    // open_jtalkのビルドprofileがdebugだとWindowsでリンクエラーになるため、Releaseにする
     if debug {
         cmake_conf.profile("Release");
     }
