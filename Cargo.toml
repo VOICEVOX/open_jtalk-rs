@@ -1,2 +1,2 @@
 [workspace]
-members = ["crates/openjtalk-sys", "crates/openjtalk"]
+members = ["crates/open_jtalk-sys", "crates/open_jtalk"]

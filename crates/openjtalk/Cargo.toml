@@ -1,7 +1,0 @@
-[package]
-name = "openjtalk"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-openjtalk-sys = { path = "../openjtalk-sys", version = "0.1.111" }

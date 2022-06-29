@@ -6,8 +6,9 @@ use std::ffi::{CStr, CString};
 
 #[repr(i32)]
 pub enum Text2MecabError {
-    Range = openjtalk_sys::text2mecab_result_t::TEXT2MECAB_RESULT_RANGE_ERROR as i32,
-    InvalidArgument = openjtalk_sys::text2mecab_result_t::TEXT2MECAB_RESULT_INVALID_ARGUMENT as i32,
+    Range = open_jtalk_sys::text2mecab_result_t::TEXT2MECAB_RESULT_RANGE_ERROR as i32,
+    InvalidArgument =
+        open_jtalk_sys::text2mecab_result_t::TEXT2MECAB_RESULT_INVALID_ARGUMENT as i32,
 }
 
 pub fn text2mecab(input: impl AsRef<str>) -> Result<String, Text2MecabError> {
@@ -18,13 +19,13 @@ pub fn text2mecab(input: impl AsRef<str>) -> Result<String, Text2MecabError> {
     let text = CString::new(input.as_ref()).unwrap();
 
     let result = unsafe {
-        openjtalk_sys::text2mecab(
+        open_jtalk_sys::text2mecab(
             output.as_mut_ptr() as *mut i8,
             MAX_TEXT2MECAB_SIZE,
             text.as_ptr(),
         )
     };
-    if result == openjtalk_sys::text2mecab_result_t::TEXT2MECAB_RESULT_SUCCESS {
+    if result == open_jtalk_sys::text2mecab_result_t::TEXT2MECAB_RESULT_SUCCESS {
         unsafe {
             output.set_len(
                 CStr::from_ptr(output.as_ptr() as *const i8)
@@ -41,5 +42,5 @@ pub fn text2mecab(input: impl AsRef<str>) -> Result<String, Text2MecabError> {
 
 #[inline]
 fn bool_number_to_bool(bool_number: i32) -> bool {
-    bool_number == openjtalk_sys::TRUE as i32
+    bool_number == open_jtalk_sys::TRUE as i32
 }

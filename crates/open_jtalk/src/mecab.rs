@@ -1,13 +1,13 @@
 use super::*;
 use std::{ffi::CString, path::Path, ptr::null_mut};
 
-pub struct Mecab(openjtalk_sys::Mecab);
+pub struct Mecab(open_jtalk_sys::Mecab);
 
 pub struct MecabFeature;
 
 impl Default for Mecab {
     fn default() -> Self {
-        Self(openjtalk_sys::Mecab {
+        Self(open_jtalk_sys::Mecab {
             feature: null_mut(),
             size: Default::default(),
             model: null_mut(),
@@ -18,17 +18,17 @@ impl Default for Mecab {
 }
 
 impl Mecab {
-    unsafe fn as_raw_ptr(&mut self) -> *mut openjtalk_sys::Mecab {
-        &mut self.0 as *mut openjtalk_sys::Mecab
+    unsafe fn as_raw_ptr(&mut self) -> *mut open_jtalk_sys::Mecab {
+        &mut self.0 as *mut open_jtalk_sys::Mecab
     }
     pub fn initialize(&mut self) -> bool {
-        unsafe { bool_number_to_bool(openjtalk_sys::Mecab_initialize(self.as_raw_ptr())) }
+        unsafe { bool_number_to_bool(open_jtalk_sys::Mecab_initialize(self.as_raw_ptr())) }
     }
 
     pub fn load(&mut self, dic_dir: impl AsRef<Path>) -> bool {
         let dic_dir = CString::new(dic_dir.as_ref().to_str().unwrap()).unwrap();
         unsafe {
-            bool_number_to_bool(openjtalk_sys::Mecab_load(
+            bool_number_to_bool(open_jtalk_sys::Mecab_load(
                 self.as_raw_ptr(),
                 dic_dir.as_ptr(),
             ))
@@ -38,14 +38,14 @@ impl Mecab {
     pub fn get_feature(&mut self) -> &mut MecabFeature {
         #[allow(clippy::transmute_ptr_to_ref)]
         unsafe {
-            std::mem::transmute(openjtalk_sys::Mecab_get_feature(self.as_raw_ptr()))
+            std::mem::transmute(open_jtalk_sys::Mecab_get_feature(self.as_raw_ptr()))
         }
     }
 
     pub fn analysis(&mut self, str: impl AsRef<str>) -> bool {
         let str = CString::new(str.as_ref()).unwrap();
         unsafe {
-            bool_number_to_bool(openjtalk_sys::Mecab_analysis(
+            bool_number_to_bool(open_jtalk_sys::Mecab_analysis(
                 self.as_raw_ptr(),
                 str.as_ptr(),
             ))
@@ -53,15 +53,15 @@ impl Mecab {
     }
 
     pub fn print(&mut self) -> bool {
-        unsafe { bool_number_to_bool(openjtalk_sys::Mecab_print(self.as_raw_ptr())) }
+        unsafe { bool_number_to_bool(open_jtalk_sys::Mecab_print(self.as_raw_ptr())) }
     }
 
     pub fn get_size(&mut self) -> i32 {
-        unsafe { openjtalk_sys::Mecab_get_size(self.as_raw_ptr()) }
+        unsafe { open_jtalk_sys::Mecab_get_size(self.as_raw_ptr()) }
     }
 
     pub fn clear(&mut self) -> bool {
-        unsafe { bool_number_to_bool(openjtalk_sys::Mecab_clear(self.as_raw_ptr())) }
+        unsafe { bool_number_to_bool(open_jtalk_sys::Mecab_clear(self.as_raw_ptr())) }
     }
 }
 

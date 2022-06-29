@@ -22,7 +22,7 @@ runs:
         # cargoのキャシュが原因でテストが失敗してることが考えられる場合はバージョン部分を変更する
         key: "v1-cargo-test-cache-${{ inputs.triple }}"
     - name: gen bind
-      run: cargo build --target ${{ inputs.triple }} -p openjtalk-sys --features generate-bindings
+      run: cargo build --target ${{ inputs.triple }} -p open_jtalk-sys --features generate-bindings
       shell: bash
     - name: check
       run: git status -s | grep -E "M|A"

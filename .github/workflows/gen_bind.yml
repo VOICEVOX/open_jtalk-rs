@@ -2,10 +2,10 @@ name: gen_bind
 on:
   push:
     paths:
-      - "crates/openjtalk-sys/wrapper.hpp"
-      - "crates/openjtalk-sys/openjtalk/src/*"
-      - "crates/openjtalk-sys/openjtalk/CMakeLists.txt"
-      - "crates/openjtalk-sys/build.rs"
+      - "crates/open_jtalk-sys/wrapper.hpp"
+      - "crates/open_jtalk-sys/open_jtalk/src/*"
+      - "crates/open_jtalk-sys/open_jtalk/CMakeLists.txt"
+      - "crates/open_jtalk-sys/build.rs"
       - ".github/workflows/gen_bind.yml"
       - ".github/actions/auto_gen_bind_pr/action.yml"
 jobs:
