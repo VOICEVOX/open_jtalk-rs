@@ -1,3 +1,4 @@
+use super::*;
 use std::ptr::null_mut;
 
 pub struct JpCommon(open_jtalk_sys::JPCommon);
@@ -14,16 +15,20 @@ impl Default for JpCommon {
     }
 }
 
+impl resources::Resource for JpCommon {
+    fn initialize(&mut self) -> bool {
+        unsafe { open_jtalk_sys::JPCommon_initialize(self.as_raw_ptr()) };
+        true
+    }
+    fn clear(&mut self) -> bool {
+        unsafe { open_jtalk_sys::JPCommon_clear(self.as_raw_ptr()) };
+        true
+    }
+}
+
 impl JpCommon {
     unsafe fn as_raw_ptr(&self) -> *mut open_jtalk_sys::JPCommon {
         &self.0 as *const open_jtalk_sys::JPCommon as *mut open_jtalk_sys::JPCommon
-    }
-    pub fn initialize(&mut self) {
-        unsafe { open_jtalk_sys::JPCommon_initialize(self.as_raw_ptr()) }
-    }
-
-    pub fn clear(&mut self) {
-        unsafe { open_jtalk_sys::JPCommon_clear(self.as_raw_ptr()) }
     }
 
     pub fn refresh(&mut self) {

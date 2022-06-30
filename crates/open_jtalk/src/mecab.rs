@@ -17,12 +17,18 @@ impl Default for Mecab {
     }
 }
 
+impl resources::Resource for Mecab {
+    fn initialize(&mut self) -> bool {
+        unsafe { bool_number_to_bool(open_jtalk_sys::Mecab_initialize(self.as_raw_ptr())) }
+    }
+    fn clear(&mut self) -> bool {
+        unsafe { bool_number_to_bool(open_jtalk_sys::Mecab_clear(self.as_raw_ptr())) }
+    }
+}
+
 impl Mecab {
     unsafe fn as_raw_ptr(&mut self) -> *mut open_jtalk_sys::Mecab {
         &mut self.0 as *mut open_jtalk_sys::Mecab
-    }
-    pub fn initialize(&mut self) -> bool {
-        unsafe { bool_number_to_bool(open_jtalk_sys::Mecab_initialize(self.as_raw_ptr())) }
     }
 
     pub fn load(&mut self, dic_dir: impl AsRef<Path>) -> bool {
@@ -55,10 +61,6 @@ impl Mecab {
 
     pub fn get_size(&mut self) -> i32 {
         unsafe { open_jtalk_sys::Mecab_get_size(self.as_raw_ptr()) }
-    }
-
-    pub fn clear(&mut self) -> bool {
-        unsafe { bool_number_to_bool(open_jtalk_sys::Mecab_clear(self.as_raw_ptr())) }
     }
 }
 
