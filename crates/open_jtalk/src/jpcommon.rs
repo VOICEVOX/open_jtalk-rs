@@ -31,7 +31,7 @@ impl JpCommon {
         if self.0.is_none() {
             panic!("uninitialized jpcommon");
         }
-        &mut self.0.unwrap() as *mut open_jtalk_sys::JPCommon
+        self.0.as_ref().unwrap() as *const open_jtalk_sys::JPCommon as *mut open_jtalk_sys::JPCommon
     }
 
     pub fn refresh(&mut self) {

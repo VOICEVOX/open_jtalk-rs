@@ -31,7 +31,7 @@ impl Mecab {
         if self.0.is_none() {
             panic!("uninitialized mecab");
         }
-        &mut self.0.unwrap() as *mut open_jtalk_sys::Mecab
+        self.0.as_ref().unwrap() as *const open_jtalk_sys::Mecab as *mut open_jtalk_sys::Mecab
     }
 
     pub fn load(&mut self, dic_dir: impl AsRef<Path>) -> bool {

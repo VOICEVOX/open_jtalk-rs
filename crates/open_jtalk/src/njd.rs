@@ -29,7 +29,7 @@ impl Njd {
         if self.0.is_none() {
             panic!("uninitialized njd");
         }
-        &mut self.0.unwrap() as *mut open_jtalk_sys::NJD
+        self.0.as_ref().unwrap() as *const open_jtalk_sys::NJD as *mut open_jtalk_sys::NJD
     }
 
     pub fn set_pronunciation(&mut self) {
