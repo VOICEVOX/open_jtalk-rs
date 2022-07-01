@@ -1,6 +1,7 @@
 use std::ffi::{CStr, CString};
 
 #[repr(i32)]
+#[derive(PartialEq, Debug)]
 pub enum Text2MecabError {
     Range = open_jtalk_sys::text2mecab_result_t::TEXT2MECAB_RESULT_RANGE_ERROR as i32,
     InvalidArgument =
@@ -33,5 +34,22 @@ pub fn text2mecab(input: impl AsRef<str>) -> Result<String, Text2MecabError> {
         Ok(String::from_utf8(output).unwrap())
     } else {
         Err(unsafe { std::mem::transmute(result) })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::*;
+    #[rstest]
+    #[case("", Ok("".into()))]
+    #[case("あいうえお", Ok("あいうえお".into()))]
+    #[case("あいう\nえお", Ok("あいうえお".into()))]
+    fn text2mecab_works(
+        #[case] input: impl AsRef<str>,
+        #[case] expected: Result<String, Text2MecabError>,
+    ) {
+        let result = text2mecab(input);
+        assert_eq!(expected, result);
     }
 }
