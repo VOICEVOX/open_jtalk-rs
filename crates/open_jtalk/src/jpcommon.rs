@@ -1,23 +1,19 @@
 use super::*;
-use std::ptr::null_mut;
+use std::mem::MaybeUninit;
 
-pub struct JpCommon(open_jtalk_sys::JPCommon);
+#[derive(Default)]
+pub struct JpCommon(Option<open_jtalk_sys::JPCommon>);
 
 pub struct JpCommonFeature;
 
-impl Default for JpCommon {
-    fn default() -> Self {
-        Self(open_jtalk_sys::JPCommon {
-            head: null_mut(),
-            tail: null_mut(),
-            label: null_mut(),
-        })
-    }
-}
-
 impl resources::Resource for JpCommon {
     fn initialize(&mut self) -> bool {
-        unsafe { open_jtalk_sys::JPCommon_initialize(self.as_raw_ptr()) };
+        unsafe {
+            #[allow(clippy::uninit_assumed_init)]
+            let mut jpcommon: open_jtalk_sys::JPCommon = MaybeUninit::uninit().assume_init();
+            open_jtalk_sys::JPCommon_initialize(&mut jpcommon);
+            self.0 = Some(jpcommon);
+        }
         true
     }
     fn clear(&mut self) -> bool {
@@ -28,7 +24,7 @@ impl resources::Resource for JpCommon {
 
 impl JpCommon {
     unsafe fn as_raw_ptr(&self) -> *mut open_jtalk_sys::JPCommon {
-        &self.0 as *const open_jtalk_sys::JPCommon as *mut open_jtalk_sys::JPCommon
+        &mut self.0.unwrap() as *mut open_jtalk_sys::JPCommon
     }
 
     pub fn refresh(&mut self) {

@@ -1,20 +1,17 @@
 use super::*;
-use std::ptr::null_mut;
+use std::mem::MaybeUninit;
 
-pub struct Njd(open_jtalk_sys::NJD);
-
-impl Default for Njd {
-    fn default() -> Self {
-        Self(open_jtalk_sys::NJD {
-            head: null_mut(),
-            tail: null_mut(),
-        })
-    }
-}
+#[derive(Default)]
+pub struct Njd(Option<open_jtalk_sys::NJD>);
 
 impl resources::Resource for Njd {
     fn initialize(&mut self) -> bool {
-        unsafe { open_jtalk_sys::NJD_initialize(self.as_raw_ptr()) };
+        unsafe {
+            #[allow(clippy::uninit_assumed_init)]
+            let mut njd: open_jtalk_sys::NJD = MaybeUninit::uninit().assume_init();
+            open_jtalk_sys::NJD_initialize(&mut njd);
+            self.0 = Some(njd);
+        }
         true
     }
     fn clear(&mut self) -> bool {
@@ -25,7 +22,7 @@ impl resources::Resource for Njd {
 
 impl Njd {
     unsafe fn as_raw_ptr(&self) -> *mut open_jtalk_sys::NJD {
-        &self.0 as *const open_jtalk_sys::NJD as *mut open_jtalk_sys::NJD
+        &mut self.0.unwrap() as *mut open_jtalk_sys::NJD
     }
 
     pub fn set_pronunciation(&mut self) {

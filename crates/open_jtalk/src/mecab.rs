@@ -1,25 +1,20 @@
 use super::*;
-use std::{ffi::CString, path::Path, ptr::null_mut};
+use std::{ffi::CString, mem::MaybeUninit, path::Path};
 
-pub struct Mecab(open_jtalk_sys::Mecab);
+#[derive(Default)]
+pub struct Mecab(Option<open_jtalk_sys::Mecab>);
 
 pub struct MecabFeature;
 
-impl Default for Mecab {
-    fn default() -> Self {
-        Self(open_jtalk_sys::Mecab {
-            feature: null_mut(),
-            size: Default::default(),
-            model: null_mut(),
-            tagger: null_mut(),
-            lattice: null_mut(),
-        })
-    }
-}
-
 impl resources::Resource for Mecab {
     fn initialize(&mut self) -> bool {
-        unsafe { bool_number_to_bool(open_jtalk_sys::Mecab_initialize(self.as_raw_ptr())) }
+        unsafe {
+            #[allow(clippy::uninit_assumed_init)]
+            let mut m: open_jtalk_sys::Mecab = MaybeUninit::uninit().assume_init();
+            let result = bool_number_to_bool(open_jtalk_sys::Mecab_initialize(&mut m));
+            self.0 = Some(m);
+            result
+        }
     }
     fn clear(&mut self) -> bool {
         unsafe { bool_number_to_bool(open_jtalk_sys::Mecab_clear(self.as_raw_ptr())) }
@@ -27,8 +22,8 @@ impl resources::Resource for Mecab {
 }
 
 impl Mecab {
-    unsafe fn as_raw_ptr(&mut self) -> *mut open_jtalk_sys::Mecab {
-        &mut self.0 as *mut open_jtalk_sys::Mecab
+    unsafe fn as_raw_ptr(&self) -> *mut open_jtalk_sys::Mecab {
+        &mut self.0.unwrap() as *mut open_jtalk_sys::Mecab
     }
 
     pub fn load(&mut self, dic_dir: impl AsRef<Path>) -> bool {
