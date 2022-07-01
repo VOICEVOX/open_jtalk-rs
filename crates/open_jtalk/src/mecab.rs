@@ -72,3 +72,31 @@ impl MecabFeature {
         std::mem::transmute(self)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::ptr::null_mut;
+
+    use super::*;
+    use pretty_assertions::{assert_eq, assert_ne};
+    use resources::Resource as _;
+
+    #[rstest]
+    fn mecab_initialize_and_clear_works() {
+        let mut mecab = Mecab::default();
+        assert!(mecab.initialize());
+        assert!(mecab.clear());
+    }
+
+    #[rstest]
+    fn mecab_get_feature_mut() {
+        let mut mecab = ManagedResource::<Mecab>::initialize();
+        assert_eq!(null_mut(), mecab.get_feature_mut() as *mut MecabFeature);
+    }
+
+    #[rstest]
+    fn mecab_get_size_before_analysis() {
+        let mut mecab = ManagedResource::<Mecab>::initialize();
+        assert_eq!(0, mecab.get_size());
+    }
+}

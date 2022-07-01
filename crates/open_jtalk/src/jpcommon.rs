@@ -62,29 +62,29 @@ mod tests {
     use pretty_assertions::{assert_eq, assert_ne};
     use resources::Resource as _;
     #[rstest]
-    pub fn jpcommon_initialize_and_clear_works() {
+    fn jpcommon_initialize_and_clear_works() {
         let mut jpcommon = JpCommon::default();
         assert!(jpcommon.initialize());
         assert!(jpcommon.clear());
     }
 
     #[rstest]
-    pub fn jpcommon_get_label_size_before_make_labelworks() {
+    fn jpcommon_get_label_size_before_make_labelworks() {
         let mut jpcommon = ManagedResource::<JpCommon>::initialize();
-        assert_eq!(jpcommon.get_label_size(), 0);
+        assert_eq!(0, jpcommon.get_label_size());
     }
 
     #[rstest]
-    pub fn jpcommon_get_label_feature_mut_before_make_label_works() {
+    fn jpcommon_get_label_feature_mut_before_make_label_works() {
         let mut jpcommon = ManagedResource::<JpCommon>::initialize();
         assert_eq!(
-            jpcommon.get_label_feature_mut() as *mut JpCommonFeature,
-            null_mut()
+            null_mut(),
+            jpcommon.get_label_feature_mut() as *mut JpCommonFeature
         );
     }
 
     #[rstest]
-    pub fn jpcommon_refresh_works() {
+    fn jpcommon_refresh_works() {
         let mut jpcommon = ManagedResource::<JpCommon>::initialize();
         jpcommon.refresh();
     }
