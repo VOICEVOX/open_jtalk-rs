@@ -75,7 +75,7 @@ impl MecabFeature {
 
 #[cfg(test)]
 mod tests {
-    use std::ptr::null_mut;
+    use std::{path::PathBuf, ptr::null_mut};
 
     use super::*;
     use pretty_assertions::{assert_eq, assert_ne};
@@ -89,13 +89,23 @@ mod tests {
     }
 
     #[rstest]
-    fn mecab_get_feature_mut() {
+    fn mecab_get_feature_mut_works() {
         let mut mecab = ManagedResource::<Mecab>::initialize();
         assert_eq!(null_mut(), mecab.get_feature_mut() as *mut MecabFeature);
     }
 
     #[rstest]
-    fn mecab_get_size_before_analysis() {
+    fn mecab_load_works() {
+        let mut mecab = ManagedResource::<Mecab>::initialize();
+        assert!(mecab.load(
+            PathBuf::new()
+                .join(std::env!("CARGO_MANIFEST_DIR"))
+                .join("src/testdata/mecab_load/")
+        ));
+    }
+
+    #[rstest]
+    fn mecab_get_size_before_analysis_works() {
         let mut mecab = ManagedResource::<Mecab>::initialize();
         assert_eq!(0, mecab.get_size());
     }

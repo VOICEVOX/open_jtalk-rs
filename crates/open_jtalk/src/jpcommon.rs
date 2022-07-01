@@ -70,7 +70,7 @@ mod tests {
 
     #[rstest]
     fn jpcommon_get_label_size_before_make_labelworks() {
-        let mut jpcommon = ManagedResource::<JpCommon>::initialize();
+        let jpcommon = ManagedResource::<JpCommon>::initialize();
         assert_eq!(0, jpcommon.get_label_size());
     }
 
