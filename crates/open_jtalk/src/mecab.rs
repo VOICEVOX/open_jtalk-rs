@@ -8,6 +8,9 @@ pub struct MecabFeature;
 
 impl resources::Resource for Mecab {
     fn initialize(&mut self) -> bool {
+        if self.0.is_some() {
+            panic!("already initialized mecab");
+        }
         unsafe {
             #[allow(clippy::uninit_assumed_init)]
             let mut m: open_jtalk_sys::Mecab = MaybeUninit::uninit().assume_init();
@@ -23,6 +26,9 @@ impl resources::Resource for Mecab {
 
 impl Mecab {
     unsafe fn as_raw_ptr(&self) -> *mut open_jtalk_sys::Mecab {
+        if self.0.is_none() {
+            panic!("uninitialized mecab");
+        }
         &mut self.0.unwrap() as *mut open_jtalk_sys::Mecab
     }
 

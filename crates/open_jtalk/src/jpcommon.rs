@@ -8,6 +8,9 @@ pub struct JpCommonFeature;
 
 impl resources::Resource for JpCommon {
     fn initialize(&mut self) -> bool {
+        if self.0.is_some() {
+            panic!("already initialized jpcommon");
+        }
         unsafe {
             #[allow(clippy::uninit_assumed_init)]
             let mut jpcommon: open_jtalk_sys::JPCommon = MaybeUninit::uninit().assume_init();
@@ -24,6 +27,9 @@ impl resources::Resource for JpCommon {
 
 impl JpCommon {
     unsafe fn as_raw_ptr(&self) -> *mut open_jtalk_sys::JPCommon {
+        if self.0.is_none() {
+            panic!("uninitialized jpcommon");
+        }
         &mut self.0.unwrap() as *mut open_jtalk_sys::JPCommon
     }
 

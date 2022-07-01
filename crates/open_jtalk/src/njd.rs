@@ -6,6 +6,9 @@ pub struct Njd(Option<open_jtalk_sys::NJD>);
 
 impl resources::Resource for Njd {
     fn initialize(&mut self) -> bool {
+        if self.0.is_some() {
+            panic!("njd already initialized");
+        }
         unsafe {
             #[allow(clippy::uninit_assumed_init)]
             let mut njd: open_jtalk_sys::NJD = MaybeUninit::uninit().assume_init();
@@ -22,6 +25,9 @@ impl resources::Resource for Njd {
 
 impl Njd {
     unsafe fn as_raw_ptr(&self) -> *mut open_jtalk_sys::NJD {
+        if self.0.is_none() {
+            panic!("uninitialized njd");
+        }
         &mut self.0.unwrap() as *mut open_jtalk_sys::NJD
     }
 
