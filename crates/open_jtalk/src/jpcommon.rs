@@ -21,6 +21,7 @@ impl resources::Resource for JpCommon {
     }
     fn clear(&mut self) -> bool {
         unsafe { open_jtalk_sys::JPCommon_clear(self.as_raw_ptr()) };
+        self.0 = None;
         true
     }
 }
@@ -38,7 +39,7 @@ impl JpCommon {
     }
 
     pub fn make_label(&mut self) {
-        unsafe { open_jtalk_sys::JPCommon_refresh(self.as_raw_ptr()) }
+        unsafe { open_jtalk_sys::JPCommon_make_label(self.as_raw_ptr()) }
     }
 
     pub fn get_label_size(&self) -> i32 {
@@ -50,5 +51,41 @@ impl JpCommon {
             &mut *(open_jtalk_sys::JPCommon_get_label_feature(self.as_raw_ptr())
                 as *mut JpCommonFeature)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::ptr::null_mut;
+
+    use super::*;
+    use pretty_assertions::{assert_eq, assert_ne};
+    use resources::Resource as _;
+    #[rstest]
+    pub fn jpcommon_initialize_and_clear_works() {
+        let mut jpcommon = JpCommon::default();
+        assert!(jpcommon.initialize());
+        assert!(jpcommon.clear());
+    }
+
+    #[rstest]
+    pub fn jpcommon_get_label_size_before_make_labelworks() {
+        let mut jpcommon = ManagedResource::<JpCommon>::initialize();
+        assert_eq!(jpcommon.get_label_size(), 0);
+    }
+
+    #[rstest]
+    pub fn jpcommon_get_label_feature_mut_before_make_label_works() {
+        let mut jpcommon = ManagedResource::<JpCommon>::initialize();
+        assert_eq!(
+            jpcommon.get_label_feature_mut() as *mut JpCommonFeature,
+            null_mut()
+        );
+    }
+
+    #[rstest]
+    pub fn jpcommon_refresh_works() {
+        let mut jpcommon = ManagedResource::<JpCommon>::initialize();
+        jpcommon.refresh();
     }
 }

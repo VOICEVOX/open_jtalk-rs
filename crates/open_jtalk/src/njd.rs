@@ -19,6 +19,7 @@ impl resources::Resource for Njd {
     }
     fn clear(&mut self) -> bool {
         unsafe { open_jtalk_sys::NJD_clear(self.as_raw_ptr()) };
+        self.0 = None;
         true
     }
 }

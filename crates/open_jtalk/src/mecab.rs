@@ -20,7 +20,9 @@ impl resources::Resource for Mecab {
         }
     }
     fn clear(&mut self) -> bool {
-        unsafe { bool_number_to_bool(open_jtalk_sys::Mecab_clear(self.as_raw_ptr())) }
+        let result = unsafe { bool_number_to_bool(open_jtalk_sys::Mecab_clear(self.as_raw_ptr())) };
+        self.0 = None;
+        result
     }
 }
 

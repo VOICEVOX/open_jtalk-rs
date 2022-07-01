@@ -5,3 +5,7 @@ edition = "2021"
 
 [dependencies]
 open_jtalk-sys = { path = "../open_jtalk-sys", version = "0.1.111" }
+
+[dev-dependencies]
+rstest = "0.12.0"
+pretty_assertions = "1.2.1"
