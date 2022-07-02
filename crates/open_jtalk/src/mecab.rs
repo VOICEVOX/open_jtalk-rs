@@ -43,6 +43,9 @@ impl Mecab {
             ))
         }
     }
+    pub fn get_feature(&self) -> &MecabFeature {
+        unsafe { &*(open_jtalk_sys::Mecab_get_feature(self.as_raw_ptr()) as *const MecabFeature) }
+    }
 
     pub fn get_feature_mut(&mut self) -> &mut MecabFeature {
         unsafe { &mut *(open_jtalk_sys::Mecab_get_feature(self.as_raw_ptr()) as *mut MecabFeature) }
@@ -62,7 +65,7 @@ impl Mecab {
         unsafe { bool_number_to_bool(open_jtalk_sys::Mecab_print(self.as_raw_ptr())) }
     }
 
-    pub fn get_size(&mut self) -> i32 {
+    pub fn get_size(&self) -> i32 {
         unsafe { open_jtalk_sys::Mecab_get_size(self.as_raw_ptr()) }
     }
 

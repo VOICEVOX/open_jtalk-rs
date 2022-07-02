@@ -55,6 +55,16 @@ impl Njd {
     pub fn refresh(&mut self) {
         unsafe { open_jtalk_sys::NJD_refresh(self.as_raw_ptr()) }
     }
+
+    pub fn mecab2njd(&mut self, mecab: &Mecab) {
+        unsafe {
+            open_jtalk_sys::mecab2njd(
+                self.as_raw_ptr(),
+                mecab.get_feature() as *const MecabFeature as *mut *mut i8,
+                mecab.get_size(),
+            )
+        }
+    }
 }
 
 #[cfg(test)]
