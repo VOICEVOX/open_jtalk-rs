@@ -65,6 +65,10 @@ impl Mecab {
     pub fn get_size(&mut self) -> i32 {
         unsafe { open_jtalk_sys::Mecab_get_size(self.as_raw_ptr()) }
     }
+
+    pub fn refresh(&mut self) -> bool {
+        unsafe { bool_number_to_bool(open_jtalk_sys::Mecab_refresh(self.as_raw_ptr())) }
+    }
 }
 
 impl MecabFeature {
@@ -75,7 +79,7 @@ impl MecabFeature {
 
 #[cfg(test)]
 mod tests {
-    use std::{path::PathBuf, ptr::null_mut};
+    use std::{path::PathBuf, ptr::null_mut, str::FromStr};
 
     use super::*;
     use pretty_assertions::{assert_eq, assert_ne};
@@ -98,9 +102,9 @@ mod tests {
     fn mecab_load_works() {
         let mut mecab = ManagedResource::<Mecab>::initialize();
         assert!(mecab.load(
-            PathBuf::new()
-                .join(std::env!("CARGO_MANIFEST_DIR"))
-                .join("src/testdata/mecab_load/")
+            PathBuf::from_str(std::env!("CARGO_MANIFEST_DIR"))
+                .unwrap()
+                .join("src/testdata/mecab_load"),
         ));
     }
 
@@ -108,5 +112,19 @@ mod tests {
     fn mecab_get_size_before_analysis_works() {
         let mut mecab = ManagedResource::<Mecab>::initialize();
         assert_eq!(0, mecab.get_size());
+    }
+
+    #[rstest]
+    #[case("h^o-d+e=s/A:2+3+2/B:22-xx_xx/C:10_7+2/D:xx+xx_xx/E:5_5!0_xx-0/F:4_1#0_xx@1_1|1_4/G:xx_xx%xx_xx_xx/H:1_5/I:1-4@2+1&2-1|6+4/J:xx_xx/K:2+2-9",true)]
+    fn mecab_analysis_works(#[case] input: &str, #[case] expected: bool) {
+        let mut mecab = ManagedResource::<Mecab>::initialize();
+        let s = text2mecab(input).unwrap();
+        assert_eq!(expected, mecab.analysis(s));
+    }
+
+    #[rstest]
+    fn mecab_refresh_works() {
+        let mut mecab = ManagedResource::<Mecab>::initialize();
+        assert!(mecab.refresh());
     }
 }

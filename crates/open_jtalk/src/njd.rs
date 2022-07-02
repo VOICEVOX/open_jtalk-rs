@@ -51,4 +51,8 @@ impl Njd {
     pub fn set_long_vowel(&mut self) {
         unsafe { open_jtalk_sys::njd_set_long_vowel(self.as_raw_ptr()) }
     }
+
+    pub fn refresh(&mut self) {
+        unsafe { open_jtalk_sys::NJD_refresh(self.as_raw_ptr()) }
+    }
 }
