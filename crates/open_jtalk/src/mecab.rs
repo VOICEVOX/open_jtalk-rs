@@ -141,4 +141,10 @@ mod tests {
         let mut mecab = ManagedResource::<Mecab>::initialize();
         assert!(mecab.refresh());
     }
+
+    #[rstest]
+    fn mecab_print_works() {
+        let mut mecab = ManagedResource::<Mecab>::initialize();
+        assert!(mecab.print());
+    }
 }
