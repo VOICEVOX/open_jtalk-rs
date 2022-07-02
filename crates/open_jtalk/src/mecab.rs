@@ -1,5 +1,5 @@
 use super::*;
-use std::{ffi::CString, mem::MaybeUninit, path::Path};
+use std::{ffi::CString, mem::MaybeUninit, path::Path, ptr::null_mut};
 
 #[derive(Default)]
 pub struct Mecab(Option<open_jtalk_sys::Mecab>);
@@ -43,12 +43,19 @@ impl Mecab {
             ))
         }
     }
-    pub fn get_feature(&self) -> &MecabFeature {
-        unsafe { &*(open_jtalk_sys::Mecab_get_feature(self.as_raw_ptr()) as *const MecabFeature) }
+    pub fn get_feature(&self) -> Option<&MecabFeature> {
+        unsafe {
+            let feature = open_jtalk_sys::Mecab_get_feature(self.as_raw_ptr());
+            if feature != null_mut() {
+                Some(&*(feature as *const MecabFeature))
+            } else {
+                None
+            }
+        }
     }
 
-    pub fn get_feature_mut(&mut self) -> &mut MecabFeature {
-        unsafe { &mut *(open_jtalk_sys::Mecab_get_feature(self.as_raw_ptr()) as *mut MecabFeature) }
+    pub fn get_feature_mut(&mut self) -> Option<&mut MecabFeature> {
+        self.get_feature().map(|feature| &mut MecabFeature)
     }
 
     pub fn analysis(&mut self, str: impl AsRef<str>) -> bool {
@@ -113,7 +120,7 @@ mod tests {
 
     #[rstest]
     fn mecab_get_size_before_analysis_works() {
-        let mut mecab = ManagedResource::<Mecab>::initialize();
+        let mecab = ManagedResource::<Mecab>::initialize();
         assert_eq!(0, mecab.get_size());
     }
 
@@ -128,6 +135,8 @@ mod tests {
         ));
         let s = text2mecab(input).unwrap();
         assert_eq!(expected, mecab.analysis(s));
+        assert_ne!(0, mecab.get_size());
+        assert_ne!(null_mut(), mecab.get_feature_mut() as *mut MecabFeature);
     }
 
     #[rstest]
