@@ -45,21 +45,30 @@ impl JpCommon {
     pub fn get_label_size(&self) -> i32 {
         unsafe { open_jtalk_sys::JPCommon_get_label_size(self.as_raw_ptr()) }
     }
-
-    pub fn get_label_feature_mut(&mut self) -> &mut JpCommonFeature {
+    pub fn get_label_feature(&self) -> Option<&JpCommonFeature> {
         unsafe {
-            &mut *(open_jtalk_sys::JPCommon_get_label_feature(self.as_raw_ptr())
-                as *mut JpCommonFeature)
+            let feature = open_jtalk_sys::JPCommon_get_label_feature(self.as_raw_ptr());
+            if !feature.is_null() {
+                Some(&*(feature as *const JpCommonFeature))
+            } else {
+                None
+            }
         }
+    }
+
+    pub fn get_label_feature_mut(&mut self) -> Option<&mut JpCommonFeature> {
+        self.get_label_feature().map(|feature| unsafe {
+            #[allow(clippy::cast_ref_to_mut)]
+            &mut *(feature as *const JpCommonFeature as *mut JpCommonFeature)
+        })
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::ptr::null_mut;
 
     use super::*;
-    use pretty_assertions::{assert_eq, assert_ne};
+    use pretty_assertions::assert_eq;
     use resources::Resource as _;
     #[rstest]
     fn jpcommon_initialize_and_clear_works() {
@@ -77,10 +86,8 @@ mod tests {
     #[rstest]
     fn jpcommon_get_label_feature_mut_before_make_label_works() {
         let mut jpcommon = ManagedResource::<JpCommon>::initialize();
-        assert_eq!(
-            null_mut(),
-            jpcommon.get_label_feature_mut() as *mut JpCommonFeature
-        );
+
+        assert!(jpcommon.get_label_feature_mut().is_none());
     }
 
     #[rstest]

@@ -1,5 +1,5 @@
 use super::*;
-use std::{ffi::CString, mem::MaybeUninit, path::Path, ptr::null_mut};
+use std::{ffi::CString, mem::MaybeUninit, path::Path};
 
 #[derive(Default)]
 pub struct Mecab(Option<open_jtalk_sys::Mecab>);
@@ -46,7 +46,7 @@ impl Mecab {
     pub fn get_feature(&self) -> Option<&MecabFeature> {
         unsafe {
             let feature = open_jtalk_sys::Mecab_get_feature(self.as_raw_ptr());
-            if feature != null_mut() {
+            if !feature.is_null() {
                 Some(&*(feature as *const MecabFeature))
             } else {
                 None
@@ -55,7 +55,10 @@ impl Mecab {
     }
 
     pub fn get_feature_mut(&mut self) -> Option<&mut MecabFeature> {
-        self.get_feature().map(|feature| &mut MecabFeature)
+        self.get_feature().map(|feature| unsafe {
+            #[allow(clippy::cast_ref_to_mut)]
+            &mut *(feature as *const MecabFeature as *mut MecabFeature)
+        })
     }
 
     pub fn analysis(&mut self, str: impl AsRef<str>) -> bool {
@@ -81,15 +84,9 @@ impl Mecab {
     }
 }
 
-impl MecabFeature {
-    pub(crate) unsafe fn as_raw_ptr(&mut self) -> *mut *mut i8 {
-        std::mem::transmute(self)
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use std::{path::PathBuf, ptr::null_mut, str::FromStr};
+    use std::{path::PathBuf, str::FromStr};
 
     use super::*;
     use pretty_assertions::{assert_eq, assert_ne};
@@ -105,7 +102,7 @@ mod tests {
     #[rstest]
     fn mecab_get_feature_mut_works() {
         let mut mecab = ManagedResource::<Mecab>::initialize();
-        assert_eq!(null_mut(), mecab.get_feature_mut() as *mut MecabFeature);
+        assert!(mecab.get_feature_mut().is_none());
     }
 
     #[rstest]
@@ -136,7 +133,7 @@ mod tests {
         let s = text2mecab(input).unwrap();
         assert_eq!(expected, mecab.analysis(s));
         assert_ne!(0, mecab.get_size());
-        assert_ne!(null_mut(), mecab.get_feature_mut() as *mut MecabFeature);
+        assert!(mecab.get_feature_mut().is_some());
     }
 
     #[rstest]

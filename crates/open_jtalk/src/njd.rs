@@ -56,12 +56,12 @@ impl Njd {
         unsafe { open_jtalk_sys::NJD_refresh(self.as_raw_ptr()) }
     }
 
-    pub fn mecab2njd(&mut self, mecab: &Mecab) {
+    pub fn mecab2njd(&mut self, mecab_feature: &MecabFeature, mecab_feature_size: i32) {
         unsafe {
             open_jtalk_sys::mecab2njd(
                 self.as_raw_ptr(),
-                mecab.get_feature() as *const MecabFeature as *mut *mut i8,
-                mecab.get_size(),
+                mecab_feature as *const MecabFeature as *mut *mut i8,
+                mecab_feature_size,
             )
         }
     }
@@ -126,6 +126,6 @@ mod tests {
         ));
         let s = text2mecab("h^o-d+e=s/A:2+3+2/B:22-xx_xx/C:10_7+2/D:xx+xx_xx/E:5_5!0_xx-0/F:4_1#0_xx@1_1|1_4/G:xx_xx%xx_xx_xx/H:1_5/I:1-4@2+1&2-1|6+4/J:xx_xx/K:2+2-9").unwrap();
         assert!(mecab.analysis(s));
-        njd.mecab2njd(&mecab);
+        njd.mecab2njd(mecab.get_feature().unwrap(), mecab.get_size());
     }
 }
