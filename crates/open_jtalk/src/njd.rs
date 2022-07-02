@@ -56,3 +56,49 @@ impl Njd {
         unsafe { open_jtalk_sys::NJD_refresh(self.as_raw_ptr()) }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use resources::Resource as _;
+    #[rstest]
+    fn njd_initialize_and_clear_works() {
+        let mut njd = Njd::default();
+        assert!(njd.initialize());
+        assert!(njd.clear());
+    }
+
+    #[rstest]
+    fn njd_set_pronunciation_works() {
+        let mut njd = ManagedResource::<Njd>::initialize();
+        njd.set_pronunciation();
+    }
+
+    #[rstest]
+    fn njd_set_digit_works() {
+        let mut njd = ManagedResource::<Njd>::initialize();
+        njd.set_digit();
+    }
+
+    #[rstest]
+    fn njd_set_accent_type_works() {
+        let mut njd = ManagedResource::<Njd>::initialize();
+        njd.set_accent_type();
+    }
+
+    #[rstest]
+    fn njd_set_unvoiced_vowel_works() {
+        let mut njd = ManagedResource::<Njd>::initialize();
+        njd.set_unvoiced_vowel();
+    }
+    #[rstest]
+    fn njd_set_long_vowel_works() {
+        let mut njd = ManagedResource::<Njd>::initialize();
+        njd.set_long_vowel();
+    }
+    #[rstest]
+    fn njd_refresh_works() {
+        let mut njd = ManagedResource::<Njd>::initialize();
+        njd.refresh();
+    }
+}
