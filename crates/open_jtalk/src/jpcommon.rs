@@ -1,5 +1,5 @@
 use super::*;
-use std::mem::MaybeUninit;
+use std::{ffi::CStr, mem::MaybeUninit};
 
 #[derive(Default)]
 pub struct JpCommon(Option<open_jtalk_sys::JPCommon>);
@@ -45,6 +45,22 @@ impl JpCommon {
     pub fn get_label_size(&self) -> i32 {
         unsafe { open_jtalk_sys::JPCommon_get_label_size(self.as_raw_ptr()) }
     }
+
+    pub fn label_feature_to_vec(&self) -> Option<Vec<String>> {
+        self.get_label_feature().map(|label_features| {
+            let label_features = label_features as *const JpCommonFeature as *mut *mut i8;
+            let label_features_size = self.get_label_size();
+            let mut output = Vec::with_capacity(label_features_size as usize);
+            for i in 0..label_features_size {
+                unsafe {
+                    let label_feature = *label_features.offset(i as isize);
+                    output.push(CStr::from_ptr(label_feature).to_str().unwrap().to_string());
+                }
+            }
+            output
+        })
+    }
+
     pub fn get_label_feature(&self) -> Option<&JpCommonFeature> {
         unsafe {
             let feature = open_jtalk_sys::JPCommon_get_label_feature(self.as_raw_ptr());
