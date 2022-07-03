@@ -1,9 +1,11 @@
 use std::ffi::{CStr, CString};
 
 #[repr(i32)]
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, thiserror::Error)]
 pub enum Text2MecabError {
+    #[error("text2mecab range error")]
     Range = open_jtalk_sys::text2mecab_result_t::TEXT2MECAB_RESULT_RANGE_ERROR as i32,
+    #[error("text2mecab invalid argument")]
     InvalidArgument =
         open_jtalk_sys::text2mecab_result_t::TEXT2MECAB_RESULT_INVALID_ARGUMENT as i32,
 }
