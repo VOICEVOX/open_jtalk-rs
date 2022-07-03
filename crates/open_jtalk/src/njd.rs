@@ -25,7 +25,7 @@ impl resources::Resource for Njd {
 }
 
 impl Njd {
-    unsafe fn as_raw_ptr(&self) -> *mut open_jtalk_sys::NJD {
+    pub(crate) unsafe fn as_raw_ptr(&self) -> *mut open_jtalk_sys::NJD {
         if self.0.is_none() {
             panic!("uninitialized njd");
         }
