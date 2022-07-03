@@ -44,6 +44,10 @@ impl Njd {
         unsafe { open_jtalk_sys::njd_set_accent_type(self.as_raw_ptr()) }
     }
 
+    pub fn set_accent_phrase(&mut self) {
+        unsafe { open_jtalk_sys::njd_set_accent_phrase(self.as_raw_ptr()) }
+    }
+
     pub fn set_unvoiced_vowel(&mut self) {
         unsafe { open_jtalk_sys::njd_set_unvoiced_vowel(self.as_raw_ptr()) }
     }
@@ -96,6 +100,12 @@ mod tests {
     fn njd_set_accent_type_works() {
         let mut njd = ManagedResource::<Njd>::initialize();
         njd.set_accent_type();
+    }
+
+    #[rstest]
+    fn njd_set_accent_phrase_works() {
+        let mut njd = ManagedResource::<Njd>::initialize();
+        njd.set_accent_phrase();
     }
 
     #[rstest]
