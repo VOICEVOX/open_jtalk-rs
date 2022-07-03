@@ -46,8 +46,8 @@ impl JpCommon {
         unsafe { open_jtalk_sys::JPCommon_get_label_size(self.as_raw_ptr()) }
     }
 
-    pub fn label_feature_to_vec(&self) -> Option<Vec<String>> {
-        self.get_label_feature().map(|label_features| {
+    pub fn get_label_feature_to_vec(&self) -> Option<Vec<String>> {
+        self.get_label_feature_raw().map(|label_features| {
             let label_features = label_features as *const JpCommonFeature as *mut *mut i8;
             let label_features_size = self.get_label_size();
             let mut output = Vec::with_capacity(label_features_size as usize);
@@ -61,7 +61,7 @@ impl JpCommon {
         })
     }
 
-    pub fn get_label_feature(&self) -> Option<&JpCommonFeature> {
+    pub(crate) fn get_label_feature_raw(&self) -> Option<&JpCommonFeature> {
         unsafe {
             let feature = open_jtalk_sys::JPCommon_get_label_feature(self.as_raw_ptr());
             if !feature.is_null() {
@@ -70,13 +70,6 @@ impl JpCommon {
                 None
             }
         }
-    }
-
-    pub fn get_label_feature_mut(&mut self) -> Option<&mut JpCommonFeature> {
-        self.get_label_feature().map(|feature| unsafe {
-            #[allow(clippy::cast_ref_to_mut)]
-            &mut *(feature as *const JpCommonFeature as *mut JpCommonFeature)
-        })
     }
 }
 
@@ -101,9 +94,9 @@ mod tests {
 
     #[rstest]
     fn jpcommon_get_label_feature_mut_before_make_label_works() {
-        let mut jpcommon = ManagedResource::<JpCommon>::initialize();
+        let jpcommon = ManagedResource::<JpCommon>::initialize();
 
-        assert!(jpcommon.get_label_feature_mut().is_none());
+        assert!(jpcommon.get_label_feature_raw().is_none());
     }
 
     #[rstest]
