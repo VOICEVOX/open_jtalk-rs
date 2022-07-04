@@ -4,7 +4,13 @@ use std::{ffi::CStr, mem::MaybeUninit};
 #[derive(Default)]
 pub struct JpCommon(Option<open_jtalk_sys::JPCommon>);
 
-pub struct JpCommonFeature;
+pub struct JpCommonLabelFeature;
+
+pub struct JpCommonLabelFeatureIter<'a> {
+    label_features: &'a JpCommonLabelFeature,
+    index: i32,
+    size: i32,
+}
 
 impl resources::Resource for JpCommon {
     fn initialize(&mut self) -> bool {
@@ -23,6 +29,22 @@ impl resources::Resource for JpCommon {
         unsafe { open_jtalk_sys::JPCommon_clear(self.as_raw_ptr()) };
         self.0 = None;
         true
+    }
+}
+
+impl<'a> Iterator for JpCommonLabelFeatureIter<'a> {
+    type Item = &'a str;
+    fn next(&mut self) -> Option<Self::Item> {
+        let label_features_ptr = self.label_features as *const JpCommonLabelFeature as *mut *mut i8;
+        unsafe {
+            if self.index < self.size {
+                let label_feature = *label_features_ptr.offset(self.index as isize);
+                self.index += 1;
+                Some(CStr::from_ptr(label_feature).to_str().unwrap())
+            } else {
+                None
+            }
+        }
     }
 }
 
@@ -50,26 +72,18 @@ impl JpCommon {
         unsafe { open_jtalk_sys::njd2jpcommon(self.as_raw_ptr(), njd.as_raw_ptr()) }
     }
 
-    pub fn get_label_feature_to_vec(&self) -> Option<Vec<&str>> {
+    pub fn get_label_feature_to_iter(&self) -> Option<JpCommonLabelFeatureIter> {
         self.get_label_feature_raw().map(|label_features| {
-            let label_features = label_features as *const JpCommonFeature as *mut *mut i8;
             let label_features_size = self.get_label_size();
-            let mut output = Vec::with_capacity(label_features_size as usize);
-            for i in 0..label_features_size {
-                unsafe {
-                    let label_feature = *label_features.offset(i as isize);
-                    output.push(CStr::from_ptr(label_feature).to_str().unwrap());
-                }
-            }
-            output
+            JpCommonLabelFeatureIter{label_features,index:0,size:label_features_size}
         })
     }
 
-    pub(crate) fn get_label_feature_raw(&self) -> Option<&JpCommonFeature> {
+    pub(crate) fn get_label_feature_raw(&self) -> Option<&JpCommonLabelFeature> {
         unsafe {
             let feature = open_jtalk_sys::JPCommon_get_label_feature(self.as_raw_ptr());
             if !feature.is_null() {
-                Some(&*(feature as *const JpCommonFeature))
+                Some(&*(feature as *const JpCommonLabelFeature))
             } else {
                 None
             }
