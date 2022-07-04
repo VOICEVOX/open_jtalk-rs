@@ -50,7 +50,7 @@ impl JpCommon {
         unsafe { open_jtalk_sys::njd2jpcommon(self.as_raw_ptr(), njd.as_raw_ptr()) }
     }
 
-    pub fn get_label_feature_to_vec(&self) -> Option<Vec<String>> {
+    pub fn get_label_feature_to_vec(&self) -> Option<Vec<&str>> {
         self.get_label_feature_raw().map(|label_features| {
             let label_features = label_features as *const JpCommonFeature as *mut *mut i8;
             let label_features_size = self.get_label_size();
@@ -58,7 +58,7 @@ impl JpCommon {
             for i in 0..label_features_size {
                 unsafe {
                     let label_feature = *label_features.offset(i as isize);
-                    output.push(CStr::from_ptr(label_feature).to_str().unwrap().to_string());
+                    output.push(CStr::from_ptr(label_feature).to_str().unwrap());
                 }
             }
             output
