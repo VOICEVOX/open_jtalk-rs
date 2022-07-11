@@ -132,7 +132,7 @@ mod tests {
         assert!(mecab.load(
             PathBuf::from_str(std::env!("CARGO_MANIFEST_DIR"))
                 .unwrap()
-                .join("src/testdata/mecab_load"),
+                .join("src/mecab/testdata/mecab_load"),
         ));
         let s = text2mecab("h^o-d+e=s/A:2+3+2/B:22-xx_xx/C:10_7+2/D:xx+xx_xx/E:5_5!0_xx-0/F:4_1#0_xx@1_1|1_4/G:xx_xx%xx_xx_xx/H:1_5/I:1-4@2+1&2-1|6+4/J:xx_xx/K:2+2-9").unwrap();
         assert!(mecab.analysis(s));

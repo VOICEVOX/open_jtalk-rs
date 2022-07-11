@@ -115,7 +115,7 @@ mod tests {
         assert!(mecab.load(
             PathBuf::from_str(std::env!("CARGO_MANIFEST_DIR"))
                 .unwrap()
-                .join("src/testdata/mecab_load"),
+                .join("src/mecab/testdata/mecab_load"),
         ));
     }
 
@@ -132,7 +132,7 @@ mod tests {
         assert!(mecab.load(
             PathBuf::from_str(std::env!("CARGO_MANIFEST_DIR"))
                 .unwrap()
-                .join("src/testdata/mecab_load"),
+                .join("src/mecab/testdata/mecab_load"),
         ));
         let s = text2mecab(input).unwrap();
         assert_eq!(expected, mecab.analysis(s));
