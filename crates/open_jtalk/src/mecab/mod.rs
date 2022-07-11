@@ -1,3 +1,7 @@
+mod mecab_dict_index;
+
+pub use mecab_dict_index::*;
+
 use super::*;
 use std::{ffi::CString, mem::MaybeUninit, path::Path};
 
