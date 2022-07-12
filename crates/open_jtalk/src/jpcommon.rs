@@ -12,21 +12,19 @@ pub struct JpCommonLabelFeatureIter<'a> {
     size: i32,
 }
 
-impl resources::Resource for JpCommon {
-    fn initialize(&mut self) -> bool {
+unsafe impl resources::Resource for JpCommon {
+    unsafe fn initialize(&mut self) -> bool {
         if self.0.is_some() {
             panic!("already initialized jpcommon");
         }
-        unsafe {
-            #[allow(clippy::uninit_assumed_init)]
-            let mut jpcommon: open_jtalk_sys::JPCommon = MaybeUninit::uninit().assume_init();
-            open_jtalk_sys::JPCommon_initialize(&mut jpcommon);
-            self.0 = Some(jpcommon);
-        }
+        #[allow(clippy::uninit_assumed_init)]
+        let mut jpcommon: open_jtalk_sys::JPCommon = MaybeUninit::uninit().assume_init();
+        open_jtalk_sys::JPCommon_initialize(&mut jpcommon);
+        self.0 = Some(jpcommon);
         true
     }
-    fn clear(&mut self) -> bool {
-        unsafe { open_jtalk_sys::JPCommon_clear(self.as_raw_ptr()) };
+    unsafe fn clear(&mut self) -> bool {
+        open_jtalk_sys::JPCommon_clear(self.as_raw_ptr());
         self.0 = None;
         true
     }
@@ -75,7 +73,11 @@ impl JpCommon {
     pub fn get_label_feature_to_iter(&self) -> Option<JpCommonLabelFeatureIter> {
         self.get_label_feature_raw().map(|label_features| {
             let label_features_size = self.get_label_size();
-            JpCommonLabelFeatureIter{label_features,index:0,size:label_features_size}
+            JpCommonLabelFeatureIter {
+                label_features,
+                index: 0,
+                size: label_features_size,
+            }
         })
     }
 
@@ -100,8 +102,10 @@ mod tests {
     #[rstest]
     fn jpcommon_initialize_and_clear_works() {
         let mut jpcommon = JpCommon::default();
-        assert!(jpcommon.initialize());
-        assert!(jpcommon.clear());
+        unsafe {
+            assert!(jpcommon.initialize());
+            assert!(jpcommon.clear());
+        }
     }
 
     #[rstest]

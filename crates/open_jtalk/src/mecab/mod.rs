@@ -10,21 +10,19 @@ pub struct Mecab(Option<open_jtalk_sys::Mecab>);
 
 pub struct MecabFeature;
 
-impl resources::Resource for Mecab {
-    fn initialize(&mut self) -> bool {
+unsafe impl resources::Resource for Mecab {
+    unsafe fn initialize(&mut self) -> bool {
         if self.0.is_some() {
             panic!("already initialized mecab");
         }
-        unsafe {
-            #[allow(clippy::uninit_assumed_init)]
-            let mut m: open_jtalk_sys::Mecab = MaybeUninit::uninit().assume_init();
-            let result = bool_number_to_bool(open_jtalk_sys::Mecab_initialize(&mut m));
-            self.0 = Some(m);
-            result
-        }
+        #[allow(clippy::uninit_assumed_init)]
+        let mut m: open_jtalk_sys::Mecab = MaybeUninit::uninit().assume_init();
+        let result = bool_number_to_bool(open_jtalk_sys::Mecab_initialize(&mut m));
+        self.0 = Some(m);
+        result
     }
-    fn clear(&mut self) -> bool {
-        let result = unsafe { bool_number_to_bool(open_jtalk_sys::Mecab_clear(self.as_raw_ptr())) };
+    unsafe fn clear(&mut self) -> bool {
+        let result = bool_number_to_bool(open_jtalk_sys::Mecab_clear(self.as_raw_ptr()));
         self.0 = None;
         result
     }
@@ -99,8 +97,10 @@ mod tests {
     #[rstest]
     fn mecab_initialize_and_clear_works() {
         let mut mecab = Mecab::default();
-        assert!(mecab.initialize());
-        assert!(mecab.clear());
+        unsafe {
+            assert!(mecab.initialize());
+            assert!(mecab.clear());
+        }
     }
 
     #[rstest]

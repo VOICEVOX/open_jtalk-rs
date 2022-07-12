@@ -1,9 +1,10 @@
 use std::ops::{Deref, DerefMut};
 
 pub mod resources {
-    pub trait Resource: Default {
-        fn initialize(&mut self) -> bool;
-        fn clear(&mut self) -> bool;
+    #[allow(clippy::missing_safety_doc)]
+    pub unsafe trait Resource: Default {
+        unsafe fn initialize(&mut self) -> bool;
+        unsafe fn clear(&mut self) -> bool;
     }
 }
 
@@ -12,14 +13,18 @@ pub struct ManagedResource<R: resources::Resource>(R);
 impl<R: resources::Resource> ManagedResource<R> {
     pub fn initialize() -> Self {
         let mut r: R = Default::default();
-        r.initialize();
+        unsafe {
+            r.initialize();
+        }
         Self(r)
     }
 }
 
 impl<R: resources::Resource> Drop for ManagedResource<R> {
     fn drop(&mut self) {
-        self.0.clear();
+        unsafe {
+            self.0.clear();
+        }
     }
 }
 

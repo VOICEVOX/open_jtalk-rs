@@ -4,21 +4,19 @@ use std::mem::MaybeUninit;
 #[derive(Default)]
 pub struct Njd(Option<open_jtalk_sys::NJD>);
 
-impl resources::Resource for Njd {
-    fn initialize(&mut self) -> bool {
+unsafe impl resources::Resource for Njd {
+    unsafe fn initialize(&mut self) -> bool {
         if self.0.is_some() {
             panic!("njd already initialized");
         }
-        unsafe {
-            #[allow(clippy::uninit_assumed_init)]
-            let mut njd: open_jtalk_sys::NJD = MaybeUninit::uninit().assume_init();
-            open_jtalk_sys::NJD_initialize(&mut njd);
-            self.0 = Some(njd);
-        }
+        #[allow(clippy::uninit_assumed_init)]
+        let mut njd: open_jtalk_sys::NJD = MaybeUninit::uninit().assume_init();
+        open_jtalk_sys::NJD_initialize(&mut njd);
+        self.0 = Some(njd);
         true
     }
-    fn clear(&mut self) -> bool {
-        unsafe { open_jtalk_sys::NJD_clear(self.as_raw_ptr()) };
+    unsafe fn clear(&mut self) -> bool {
+        open_jtalk_sys::NJD_clear(self.as_raw_ptr());
         self.0 = None;
         true
     }
@@ -80,8 +78,10 @@ mod tests {
     #[rstest]
     fn njd_initialize_and_clear_works() {
         let mut njd = Njd::default();
-        assert!(njd.initialize());
-        assert!(njd.clear());
+        unsafe {
+            assert!(njd.initialize());
+            assert!(njd.clear());
+        }
     }
 
     #[rstest]
