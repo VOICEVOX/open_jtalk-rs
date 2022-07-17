@@ -1,10 +1,10 @@
 [package]
 name = "open_jtalk"
-version = "0.1.13"
+version = "0.1.14"
 edition = "2021"
 
 [dependencies]
-open_jtalk-sys = { path = "../open_jtalk-sys", version = "0.4.111" }
+open_jtalk-sys = { path = "../open_jtalk-sys", version = "0.5.111" }
 thiserror = "1.0.31"
 
 [dev-dependencies]
