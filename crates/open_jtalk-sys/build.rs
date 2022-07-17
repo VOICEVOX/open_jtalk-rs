@@ -1,6 +1,10 @@
 use std::{env, path::Path};
 fn main() {
     let mut cmake_conf = cmake::Config::new("open_jtalk");
+    #[cfg(target_arch = "x86")]
+    let mut cmake_conf = cmake_conf
+        .define("CMAKE_CXX_FLAGS", "-m32")
+        .define("CMAKE_C_FLAGS", "-m32");
     let debug = env::var("DEBUG").is_ok();
     // open_jtalkのビルドprofileがdebugだとWindowsでリンクエラーになるため、Releaseにする
     if debug {
