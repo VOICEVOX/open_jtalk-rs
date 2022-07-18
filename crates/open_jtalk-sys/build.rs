@@ -3,9 +3,7 @@ fn main() {
     let mut cmake_conf = cmake::Config::new("open_jtalk");
     let target = env::var("TARGET").unwrap();
     let cmake_conf = if target.starts_with("i686") {
-        cmake_conf
-            .define("OPEN_JTALK_X86", "true")
-            .define("CMAKE_GENERATOR_TOOLSET", "x86")
+        cmake_conf.define("OPEN_JTALK_X86", "true")
     } else {
         &mut cmake_conf
     };
