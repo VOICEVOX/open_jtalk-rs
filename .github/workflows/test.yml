@@ -66,7 +66,10 @@ jobs:
         with:
           toolchain: stable
           target: ${{ matrix.target }}
+          default: true
       - run: cargo build --target ${{ matrix.target }} --release
+    env:
+      ARCH: ${{ matrix.arch }}
 
 env:
   CARGO_TERM_COLOR: always
