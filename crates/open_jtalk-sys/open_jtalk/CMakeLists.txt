@@ -9,6 +9,12 @@ FetchContent_Declare(
   SOURCE_SUBDIR src)
 FetchContent_MakeAvailable(openjtalk)
 
+if(DEFINED OPEN_JTALK_X86)
+  set_target_properties(openjtalk PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS
+                                                                  "-m32")
+
+endif()
+
 install(TARGETS openjtalk LIBRARY DESTINATION lib)
 install(
   FILES
