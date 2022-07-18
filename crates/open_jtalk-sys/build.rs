@@ -16,8 +16,8 @@ fn main() {
 
     let dst_dir = cmake_conf.build();
     let lib_dir = dst_dir.join("lib");
-    println!("cargo:rustc-link-search=native={}", lib_dir.display());
-    println!("cargo:rustc-link-lib=static=openjtalk");
+    println!("cargo:rustc-link-search={}", lib_dir.display());
+    println!("cargo:rustc-link-lib=openjtalk");
     generate_bindings(dst_dir.join("include"));
 }
 
