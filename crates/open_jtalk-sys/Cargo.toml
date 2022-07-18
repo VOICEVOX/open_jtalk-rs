@@ -1,6 +1,6 @@
 [package]
 name = "open_jtalk-sys"
-version = "0.7.111"
+version = "0.8.111"
 edition = "2021"
 
 [features]
