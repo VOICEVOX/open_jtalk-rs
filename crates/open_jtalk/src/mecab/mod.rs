@@ -37,7 +37,17 @@ impl Mecab {
     }
 
     pub fn load(&mut self, dic_dir: impl AsRef<Path>) -> bool {
-        let dic_dir = CString::new(dic_dir.as_ref().to_str().unwrap()).unwrap();
+        let path_str = dic_dir.as_ref().to_str().unwrap();
+        #[cfg(target_os = "windows")]
+        let dic_dir = {
+            if let Ok(s) = win_api_helper::str_to_local_multi_byte_string(path_str) {
+                s
+            } else {
+                return false;
+            }
+        };
+        #[cfg(not(target_os = "windows"))]
+        let dic_dir = CString::new(path_str).unwrap();
         unsafe {
             bool_number_to_bool(open_jtalk_sys::Mecab_load(
                 self.as_raw_ptr(),

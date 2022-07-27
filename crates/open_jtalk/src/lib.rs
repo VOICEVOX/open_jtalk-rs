@@ -4,6 +4,9 @@ mod njd;
 mod resource;
 mod text2mecab;
 
+#[cfg(target_os = "windows")]
+mod win_api_helper;
+
 pub use jpcommon::*;
 pub use mecab::*;
 pub use njd::*;
