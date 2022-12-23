@@ -1,4 +1,7 @@
-use std::{ffi::{CStr, CString}, os::raw::c_char};
+use std::{
+    ffi::{CStr, CString},
+    os::raw::c_char,
+};
 
 #[repr(i32)]
 #[derive(PartialEq, Debug, thiserror::Error)]

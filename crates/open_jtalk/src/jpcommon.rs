@@ -35,7 +35,8 @@ unsafe impl resources::Resource for JpCommon {
 impl<'a> Iterator for JpCommonLabelFeatureIter<'a> {
     type Item = &'a str;
     fn next(&mut self) -> Option<Self::Item> {
-        let label_features_ptr = self.label_features as *const JpCommonLabelFeature as *mut *mut c_char;
+        let label_features_ptr =
+            self.label_features as *const JpCommonLabelFeature as *mut *mut c_char;
         unsafe {
             if self.index < self.size {
                 let label_feature = *label_features_ptr.offset(self.index as isize);
