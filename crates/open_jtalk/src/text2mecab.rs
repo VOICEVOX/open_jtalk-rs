@@ -1,4 +1,4 @@
-use std::ffi::{CStr, CString};
+use std::{ffi::{CStr, CString}, os::raw::c_char};
 
 #[repr(i32)]
 #[derive(PartialEq, Debug, thiserror::Error)]
@@ -19,7 +19,7 @@ pub fn text2mecab(input: impl AsRef<str>) -> Result<String, Text2MecabError> {
 
     let result = unsafe {
         open_jtalk_sys::text2mecab(
-            output.as_mut_ptr() as *mut i8,
+            output.as_mut_ptr() as *mut c_char,
             MAX_TEXT2MECAB_SIZE,
             text.as_ptr(),
         )
@@ -27,7 +27,7 @@ pub fn text2mecab(input: impl AsRef<str>) -> Result<String, Text2MecabError> {
     if result == open_jtalk_sys::text2mecab_result_t::TEXT2MECAB_RESULT_SUCCESS {
         unsafe {
             output.set_len(
-                CStr::from_ptr(output.as_ptr() as *const i8)
+                CStr::from_ptr(output.as_ptr() as *const c_char)
                     .to_bytes()
                     .len(),
             )

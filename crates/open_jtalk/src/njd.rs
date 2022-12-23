@@ -1,5 +1,5 @@
 use super::*;
-use std::mem::MaybeUninit;
+use std::{mem::MaybeUninit, os::raw::c_char};
 
 #[derive(Default)]
 pub struct Njd(Option<open_jtalk_sys::NJD>);
@@ -62,7 +62,7 @@ impl Njd {
         unsafe {
             open_jtalk_sys::mecab2njd(
                 self.as_raw_ptr(),
-                mecab_feature as *const MecabFeature as *mut *mut i8,
+                mecab_feature as *const MecabFeature as *mut *mut c_char,
                 mecab_feature_size,
             )
         }

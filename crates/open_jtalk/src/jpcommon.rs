@@ -1,5 +1,5 @@
 use super::*;
-use std::{ffi::CStr, mem::MaybeUninit};
+use std::{ffi::CStr, mem::MaybeUninit, os::raw::c_char};
 
 #[derive(Default)]
 pub struct JpCommon(Option<open_jtalk_sys::JPCommon>);
@@ -33,7 +33,7 @@ unsafe impl resources::Resource for JpCommon {
 impl<'a> Iterator for JpCommonLabelFeatureIter<'a> {
     type Item = &'a str;
     fn next(&mut self) -> Option<Self::Item> {
-        let label_features_ptr = self.label_features as *const JpCommonLabelFeature as *mut *mut i8;
+        let label_features_ptr = self.label_features as *const JpCommonLabelFeature as *mut *mut c_char;
         unsafe {
             if self.index < self.size {
                 let label_feature = *label_features_ptr.offset(self.index as isize);
