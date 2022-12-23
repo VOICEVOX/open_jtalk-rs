@@ -17,9 +17,11 @@ unsafe impl resources::Resource for JpCommon {
         if self.0.is_some() {
             panic!("already initialized jpcommon");
         }
-        #[allow(clippy::uninit_assumed_init)]
-        let mut jpcommon: open_jtalk_sys::JPCommon = MaybeUninit::uninit().assume_init();
-        open_jtalk_sys::JPCommon_initialize(&mut jpcommon);
+        let jpcommon = {
+            let mut jpcommon = MaybeUninit::<open_jtalk_sys::JPCommon>::uninit();
+            open_jtalk_sys::JPCommon_initialize(jpcommon.as_mut_ptr());
+            jpcommon.assume_init()
+        };
         self.0 = Some(jpcommon);
         true
     }
