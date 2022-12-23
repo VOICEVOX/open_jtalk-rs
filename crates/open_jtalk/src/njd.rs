@@ -9,9 +9,11 @@ unsafe impl resources::Resource for Njd {
         if self.0.is_some() {
             panic!("njd already initialized");
         }
-        #[allow(clippy::uninit_assumed_init)]
-        let mut njd: open_jtalk_sys::NJD = MaybeUninit::uninit().assume_init();
-        open_jtalk_sys::NJD_initialize(&mut njd);
+        let njd = {
+            let mut njd = MaybeUninit::<open_jtalk_sys::NJD>::uninit();
+            open_jtalk_sys::NJD_initialize(njd.as_mut_ptr());
+            njd.assume_init()
+        };
         self.0 = Some(njd);
         true
     }

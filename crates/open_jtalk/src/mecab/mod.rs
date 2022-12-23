@@ -15,9 +15,11 @@ unsafe impl resources::Resource for Mecab {
         if self.0.is_some() {
             panic!("already initialized mecab");
         }
-        #[allow(clippy::uninit_assumed_init)]
-        let mut m: open_jtalk_sys::Mecab = MaybeUninit::uninit().assume_init();
-        let result = bool_number_to_bool(open_jtalk_sys::Mecab_initialize(&mut m));
+        let (result, m) = {
+            let mut m = MaybeUninit::<open_jtalk_sys::Mecab>::uninit();
+            let result = bool_number_to_bool(open_jtalk_sys::Mecab_initialize(m.as_mut_ptr()));
+            (result, m.assume_init())
+        };
         self.0 = Some(m);
         result
     }
