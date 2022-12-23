@@ -11,6 +11,12 @@ runs:
       shell: bash
       run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
       id: extract_branch
+    - name: Install cross compiler for linux aarch64
+      if: inputs.triple == 'aarch64-unknown-linux-gnu'
+      shell: bash
+      run: |
+        sudo apt update
+        sudo apt install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
     - uses: actions-rs/toolchain@v1
       with:
         toolchain: stable
