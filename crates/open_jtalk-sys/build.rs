@@ -45,7 +45,7 @@ fn generate_bindings(include_dir: impl AsRef<Path>) {
         .size_t_is_usize(true)
         .rustfmt_bindings(true)
         .rustified_enum("*");
-    let paths = std::fs::read_dir(&include_dir).unwrap();
+    let paths = std::fs::read_dir(include_dir).unwrap();
     for path in paths {
         let path = path.unwrap();
         let file_name = path.file_name().to_str().unwrap().to_string();
