@@ -22,7 +22,8 @@ fn main() {
 
     // androidのminSdkを指定する
     if target.contains("android") {
-        cmake_conf.define("CMAKE_SYSTEM_VERSION","29");
+         // nfkとcmake間でパスに問題があるため１にする
+        cmake_conf.define("CMAKE_SYSTEM_VERSION","1");
     }
 
     let dst_dir = cmake_conf.build();
