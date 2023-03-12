@@ -20,6 +20,11 @@ fn main() {
         cmake_conf.profile("Release");
     }
 
+    // androidのminSdkを指定する
+    if target.contains("android") {
+        cmake_conf.define("CMAKE_SYSTEM_VERSION","29");
+    }
+
     let dst_dir = cmake_conf.build();
     let lib_dir = dst_dir.join("lib");
     println!("cargo:rustc-link-search={}", lib_dir.display());
