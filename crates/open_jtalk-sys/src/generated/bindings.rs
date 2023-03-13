@@ -34,7 +34,6 @@ include!(concat!(
     "/src/generated/windows/x86_64/bindings.rs"
 ));
 
-// aarch-linux-android ではbindgenが通らないためlinuxのを読み込む
 #[cfg(all(target_os = "android", target_arch = "aarch64"))]
 include!(concat!(
     env!("CARGO_MANIFEST_DIR"),
