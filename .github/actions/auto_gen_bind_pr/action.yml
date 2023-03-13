@@ -29,7 +29,10 @@ runs:
       run: cargo build --target ${{ inputs.triple }} -p open_jtalk-sys --features generate-bindings
       shell: bash
     - name: check
-      run: git status -s | grep -E "M|A"
+      run: |
+        git status -s | tee log.txt
+        cat log.txt | grep -E "M|A"
+        rm log.txt
       shell: bash
     - name: create_pr
       if: success()
