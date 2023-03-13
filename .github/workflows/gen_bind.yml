@@ -8,6 +8,7 @@ on:
       - "crates/open_jtalk-sys/build.rs"
       - ".github/workflows/gen_bind.yml"
       - ".github/actions/auto_gen_bind_pr/action.yml"
+  workflow_dispatch:
 jobs:
   generate_bind:
     strategy:
