@@ -47,3 +47,4 @@ runs:
       run: |
         echo "nothing to do. git status -s:"
         git status -s
+      shell: bash
