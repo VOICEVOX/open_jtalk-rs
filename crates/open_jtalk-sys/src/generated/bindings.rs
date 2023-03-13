@@ -38,5 +38,5 @@ include!(concat!(
 #[cfg(all(target_os = "android", target_arch = "aarch64"))]
 include!(concat!(
     env!("CARGO_MANIFEST_DIR"),
-    "/src/generated/linux/aarch64/bindings.rs"
+    "/src/generated/android/aarch64/bindings.rs"
 ));
