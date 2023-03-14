@@ -22,7 +22,7 @@ runs:
       shell: bash
       run: |
         curl "https://dl.google.com/android/repository/android-ndk-r25c-linux.zip?hl=ja" > ndk.zip
-        echo A | unzip ndk.zip
+        unzip ndk.zip
         echo "$GITHUB_WORKSPACE/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/bin" >> "$GITHUB_PATH"
         echo "AR_aarch64_linux_android=llvm-ar" >> "$GITHUB_ENV"
     - uses: actions-rs/toolchain@v1
