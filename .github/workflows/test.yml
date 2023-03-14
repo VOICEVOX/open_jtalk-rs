@@ -64,14 +64,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      # FIXME: 別箇所にも同じコードがあるので切り出して共通化する
-      - name: Install cross compiler for android
-        if: matrix.target == 'aarch64-linux-android'
+      - uses: nttld/setup-ndk@v1
+        if: inputs.triple == 'aarch64-linux-android'
+        with:
+          ndk-version: r25b
+      - name: Set path for android
+        if: inputs.triple == 'aarch64-linux-android'
         shell: bash
         run: |
-          curl "https://dl.google.com/android/repository/android-ndk-r25c-linux.zip?hl=ja" > ndk.zip
-          echo A | unzip ndk.zip
-          echo "$GITHUB_WORKSPACE/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/bin" >> "$GITHUB_PATH"
+          echo "$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin" >> "$GITHUB_PATH"
           echo "AR_aarch64_linux_android=llvm-ar" >> "$GITHUB_ENV"
       - uses: actions-rs/toolchain@v1
         with:
