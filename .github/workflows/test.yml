@@ -65,11 +65,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: nttld/setup-ndk@v1
-        if: inputs.triple == 'aarch64-linux-android'
+        if: matrix.target == 'aarch64-linux-android'
         with:
           ndk-version: r25b
       - name: Set path for android
-        if: inputs.triple == 'aarch64-linux-android'
+        if: matrix.target == 'aarch64-linux-android'
         shell: bash
         run: |
           echo "$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin" >> "$GITHUB_PATH"
