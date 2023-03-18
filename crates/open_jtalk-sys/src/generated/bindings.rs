@@ -33,3 +33,9 @@ include!(concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/src/generated/windows/x86_64/bindings.rs"
 ));
+
+#[cfg(all(target_os = "android", target_arch = "aarch64"))]
+include!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/src/generated/android/aarch64/bindings.rs"
+));
