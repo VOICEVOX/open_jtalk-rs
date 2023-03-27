@@ -27,9 +27,7 @@ runs:
       run: |
         echo "$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin" >> "$GITHUB_PATH"
         echo "AR_aarch64_linux_android=llvm-ar" >> "$GITHUB_ENV"
-    - uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
+    - uses: dtolnay/rust-toolchain@stable
     - name: install triple
       run: rustup target add ${{ inputs.triple }}
       shell: bash
@@ -54,3 +52,9 @@ runs:
         title: Automated generate bindings for ${{ inputs.triple }}
         body: |
           Automated generate bindings for ${{ inputs.triple }}
+    - name: do nothing
+      if: failure()
+      run: |
+        echo "nothing to do. git status -s:"
+        git status -s
+      shell: bash
