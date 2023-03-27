@@ -70,7 +70,6 @@ jobs:
         run: |
           sudo apt update
           sudo apt install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
-      - uses: dtolnay/rust-toolchain@stable
       - uses: nttld/setup-ndk@v1
         if: matrix.target == 'aarch64-linux-android'
         with:
@@ -81,9 +80,7 @@ jobs:
         run: |
           echo "$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin" >> "$GITHUB_PATH"
           echo "AR_aarch64_linux_android=llvm-ar" >> "$GITHUB_ENV"
-      - uses: actions-rs/toolchain@v1
-        with:
-          targets: ${{ matrix.target }}
+      - uses: dtolnay/rust-toolchain@stable
       - run: cargo build --target ${{ matrix.target }} --release
     env:
       ARCH: ${{ matrix.arch }}
