@@ -1,4 +1,4 @@
-use std::{env, path::Path};
+use std::{env, path::Path, process::Command};
 fn main() {
     let mut cmake_conf = cmake::Config::new("open_jtalk");
     let target = env::var("TARGET").unwrap();
@@ -24,6 +24,14 @@ fn main() {
     if target.contains("android") {
         // nfkとcmake間でパスに問題があるため１にする
         cmake_conf.define("CMAKE_SYSTEM_VERSION", "1");
+    }
+
+    // iOS SDKで必要な引数を指定する
+    if target.contains("ios") {
+        // iOSとiPhone simulatorは別扱いになる
+        let sdk = if target.contains("sim") { "iphonesimulator" } else { "iphoneos" };
+        let cmake_osx_sysroot = Command::new("xcrun").args(&["--sdk", sdk, "--show-sdk-path"]).output().expect("Failed to run xcrun command");
+        cmake_conf.define("CMAKE_OSX_SYSROOT", String::from_utf8_lossy(&cmake_osx_sysroot.stdout).trim());
     }
 
     let dst_dir = cmake_conf.build();
