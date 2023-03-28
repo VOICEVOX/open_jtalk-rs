@@ -29,9 +29,19 @@ fn main() {
     // iOS SDKで必要な引数を指定する
     if target.contains("ios") {
         // iOSとiPhone simulatorは別扱いになる
-        let sdk = if target.contains("sim") { "iphonesimulator" } else { "iphoneos" };
-        let cmake_osx_sysroot = Command::new("xcrun").args(&["--sdk", sdk, "--show-sdk-path"]).output().expect("Failed to run xcrun command");
-        cmake_conf.define("CMAKE_OSX_SYSROOT", String::from_utf8_lossy(&cmake_osx_sysroot.stdout).trim());
+        let sdk = if target.contains("sim") {
+            "iphonesimulator"
+        } else {
+            "iphoneos"
+        };
+        let cmake_osx_sysroot = Command::new("xcrun")
+            .args(&["--sdk", sdk, "--show-sdk-path"])
+            .output()
+            .expect("Failed to run xcrun command");
+        cmake_conf.define(
+            "CMAKE_OSX_SYSROOT",
+            String::from_utf8_lossy(&cmake_osx_sysroot.stdout).trim(),
+        );
     }
 
     let dst_dir = cmake_conf.build();
