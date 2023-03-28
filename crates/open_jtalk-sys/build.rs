@@ -35,7 +35,7 @@ fn main() {
             "iphoneos"
         };
         let cmake_osx_sysroot = Command::new("xcrun")
-            .args(&["--sdk", sdk, "--show-sdk-path"])
+            .args(["--sdk", sdk, "--show-sdk-path"])
             .output()
             .expect("Failed to run xcrun command");
         cmake_conf.define(
