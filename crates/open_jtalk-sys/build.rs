@@ -1,7 +1,12 @@
-use std::{env, path::Path, process::Command};
+use std::{
+    env,
+    path::{Path, PathBuf},
+    process::Command,
+};
 fn main() {
     let mut cmake_conf = cmake::Config::new("open_jtalk");
     let target = env::var("TARGET").unwrap();
+    let mut include_dirs: Vec<PathBuf> = Vec::new();
     let cmake_conf = if target.starts_with("i686") {
         let cmake_conf = cmake_conf.define("OPEN_JTALK_X86", "true");
 
@@ -38,27 +43,46 @@ fn main() {
             .args(["--sdk", sdk, "--show-sdk-path"])
             .output()
             .expect("Failed to run xcrun command");
-        cmake_conf.define(
-            "CMAKE_OSX_SYSROOT",
-            String::from_utf8_lossy(&cmake_osx_sysroot.stdout).trim(),
-        );
+        let cmake_osx_sysroot = String::from_utf8_lossy(&cmake_osx_sysroot.stdout)
+            .trim()
+            .to_string();
+        cmake_conf.define("CMAKE_OSX_SYSROOT", &cmake_osx_sysroot);
+        // x86_64アーキテクチャのiPhoneシミュレータではC++のヘッダーのパスが通っていないので、通す
+        if target.starts_with("x86_64") {
+            let include_dir = PathBuf::from(&cmake_osx_sysroot)
+                .join("usr")
+                .join("include")
+                .join("c++")
+                .join("v1");
+            include_dirs.push(include_dir);
+        }
     }
 
     let dst_dir = cmake_conf.build();
     let lib_dir = dst_dir.join("lib");
     println!("cargo:rustc-link-search={}", lib_dir.display());
     println!("cargo:rustc-link-lib=openjtalk");
-    generate_bindings(dst_dir.join("include"));
+    generate_bindings(dst_dir.join("include"), include_dirs.iter());
 }
 
 #[cfg(not(feature = "generate-bindings"))]
-fn generate_bindings(#[allow(unused_variables)] include_dir: impl AsRef<Path>) {}
+fn generate_bindings(
+    #[allow(unused_variables)] allow_dir: impl AsRef<Path>,
+    include_dirs: impl Iterator<Item = impl AsRef<Path>>,
+) {
+}
 
 #[cfg(feature = "generate-bindings")]
-fn generate_bindings(include_dir: impl AsRef<Path>) {
-    use std::path::PathBuf;
-    let include_dir = include_dir.as_ref();
-    let clang_args = &[format!("-I{}", include_dir.display())];
+fn generate_bindings(
+    allow_dir: impl AsRef<Path>,
+    include_dirs: impl Iterator<Item = impl AsRef<Path>>,
+) {
+    let include_dir = allow_dir.as_ref();
+    let clang_arg = &[format!("-I{}", include_dir.display())];
+    let mut clang_args: Vec<String> = include_dirs
+        .map(|dir| format!("-I{}", dir.as_ref().display()))
+        .collect();
+    clang_args.extend(clang_arg.iter().cloned());
     println!("cargo:rerun-if-changed=wrapper.hpp");
     println!("cargo:rerun-if-changed=src/generated/bindings.rs");
     let mut bind_builder = bindgen::Builder::default()
