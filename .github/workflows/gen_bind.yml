@@ -32,6 +32,8 @@ jobs:
             triple: aarch64-apple-ios
           - os: macos-latest
             triple: aarch64-apple-ios-sim
+          - os: macos-latest
+            triple: x86_64-apple-ios
     runs-on: ${{ matrix.target.os }}
     steps:
       - uses: actions/checkout@v3

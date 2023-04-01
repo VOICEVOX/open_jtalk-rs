@@ -29,7 +29,7 @@ fn main() {
     // iOS SDKで必要な引数を指定する
     if target.contains("ios") {
         // iOSとiPhone simulatorは別扱いになる
-        let sdk = if target.ends_with("sim") {
+        let sdk = if target.ends_with("sim") || target.starts_with("x86_64") {
             "iphonesimulator"
         } else {
             "iphoneos"
