@@ -79,10 +79,10 @@ fn generate_bindings(
     include_dirs: impl Iterator<Item = impl AsRef<Path>>,
 ) {
     let include_dir = allow_dir.as_ref();
-    let clang_args: Vec<String> = include_dirs
+    let clang_args = include_dirs
         .map(|dir| format!("-I{}", dir.as_ref().display()))
         .chain([format!("-I{}", include_dir.display())])
-        .collect();
+        .collect::<Vec<_>>();
     println!("cargo:rerun-if-changed=wrapper.hpp");
     println!("cargo:rerun-if-changed=src/generated/bindings.rs");
     let mut bind_builder = bindgen::Builder::default()
