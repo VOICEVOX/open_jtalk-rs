@@ -59,10 +59,14 @@ impl Mecab {
     }
 
     pub fn get_feature_mut(&mut self) -> Option<&mut MecabFeature> {
-        self.get_feature().map(|feature| unsafe {
-            #[allow(clippy::cast_ref_to_mut)]
-            &mut *(feature as *const MecabFeature as *mut MecabFeature)
-        })
+        unsafe {
+            let feature = open_jtalk_sys::Mecab_get_feature(self.as_raw_ptr());
+            if !feature.is_null() {
+                Some(&mut *(feature as *mut MecabFeature))
+            } else {
+                None
+            }
+        }
     }
 
     pub fn analysis(&mut self, str: impl AsRef<str>) -> bool {
