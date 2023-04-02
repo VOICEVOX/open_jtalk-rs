@@ -66,8 +66,9 @@ fn main() {
 }
 
 #[cfg(not(feature = "generate-bindings"))]
+#[allow(unused_variables)]
 fn generate_bindings(
-    #[allow(unused_variables)] allow_dir: impl AsRef<Path>,
+    allow_dir: impl AsRef<Path>,
     include_dirs: impl Iterator<Item = impl AsRef<Path>>,
 ) {
 }
@@ -78,11 +79,10 @@ fn generate_bindings(
     include_dirs: impl Iterator<Item = impl AsRef<Path>>,
 ) {
     let include_dir = allow_dir.as_ref();
-    let clang_arg = &[format!("-I{}", include_dir.display())];
-    let mut clang_args: Vec<String> = include_dirs
+    let clang_args: Vec<String> = include_dirs
         .map(|dir| format!("-I{}", dir.as_ref().display()))
+        .chain([format!("-I{}", include_dir.display())])
         .collect();
-    clang_args.extend(clang_arg.iter().cloned());
     println!("cargo:rerun-if-changed=wrapper.hpp");
     println!("cargo:rerun-if-changed=src/generated/bindings.rs");
     let mut bind_builder = bindgen::Builder::default()
