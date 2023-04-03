@@ -62,24 +62,25 @@ fn main() {
     let lib_dir = dst_dir.join("lib");
     println!("cargo:rustc-link-search={}", lib_dir.display());
     println!("cargo:rustc-link-lib=openjtalk");
-    generate_bindings(dst_dir.join("include"), include_dirs.iter());
+    generate_bindings(dst_dir.join("include"), include_dirs);
 }
 
 #[cfg(not(feature = "generate-bindings"))]
 #[allow(unused_variables)]
 fn generate_bindings(
     allow_dir: impl AsRef<Path>,
-    include_dirs: impl Iterator<Item = impl AsRef<Path>>,
+    include_dirs: impl IntoIterator<Item = impl AsRef<Path>>,
 ) {
 }
 
 #[cfg(feature = "generate-bindings")]
 fn generate_bindings(
     allow_dir: impl AsRef<Path>,
-    include_dirs: impl Iterator<Item = impl AsRef<Path>>,
+    include_dirs: impl IntoIterator<Item = impl AsRef<Path>>,
 ) {
     let include_dir = allow_dir.as_ref();
     let clang_args = include_dirs
+        .into_iter()
         .map(|dir| format!("-I{}", dir.as_ref().display()))
         .chain([format!("-I{}", include_dir.display())])
         .collect::<Vec<_>>();
