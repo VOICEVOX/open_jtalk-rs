@@ -2,6 +2,7 @@ use std::{
     env,
     path::{Path, PathBuf},
     process::Command,
+    str,
 };
 fn main() {
     let mut cmake_conf = cmake::Config::new("open_jtalk");
@@ -43,7 +44,8 @@ fn main() {
             .args(["--sdk", sdk, "--show-sdk-path"])
             .output()
             .expect("Failed to run xcrun command");
-        let cmake_osx_sysroot = String::from_utf8_lossy(&cmake_osx_sysroot.stdout)
+        let cmake_osx_sysroot = str::from_utf8(&cmake_osx_sysroot.stdout)
+            .unwrap()
             .trim()
             .to_string();
         cmake_conf.define("CMAKE_OSX_SYSROOT", &cmake_osx_sysroot);
@@ -60,7 +62,7 @@ fn main() {
 
     let dst_dir = cmake_conf.build();
     let lib_dir = dst_dir.join("lib");
-    println!("cargo:rustc-link-search={}", lib_dir.display());
+    println!("cargo:rustc-link-search={}", lib_dir.to_str().unwrap());
     println!("cargo:rustc-link-lib=openjtalk");
     generate_bindings(dst_dir.join("include"), include_dirs);
 }
@@ -81,8 +83,8 @@ fn generate_bindings(
     let include_dir = allow_dir.as_ref();
     let clang_args = include_dirs
         .into_iter()
-        .map(|dir| format!("-I{}", dir.as_ref().display()))
-        .chain([format!("-I{}", include_dir.display())])
+        .map(|dir| format!("-I{}", dir.as_ref().to_str().unwrap()))
+        .chain([format!("-I{}", include_dir.to_str().unwrap())])
         .collect::<Vec<_>>();
     println!("cargo:rerun-if-changed=wrapper.hpp");
     println!("cargo:rerun-if-changed=src/generated/bindings.rs");
