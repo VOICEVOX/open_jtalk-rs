@@ -56,6 +56,8 @@ jobs:
             target: aarch64-unknown-linux-gnu
           - os: ubuntu-latest
             target: aarch64-linux-android
+          - os: ubuntu-latest
+            target: x86_64-linux-android
           - os: macos-latest
             target: aarch64-apple-darwin
           - os: macos-latest
@@ -77,15 +79,16 @@ jobs:
           sudo apt update
           sudo apt install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
       - uses: nttld/setup-ndk@v1
-        if: matrix.target == 'aarch64-linux-android'
+        if: endsWith(inputs.triple, '-linux-android')
         with:
           ndk-version: r25b
       - name: Set path for android
-        if: matrix.target == 'aarch64-linux-android'
+        if: endsWith(inputs.triple, '-linux-android')
         shell: bash
         run: |
           echo "$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin" >> "$GITHUB_PATH"
-          echo "AR_aarch64_linux_android=llvm-ar" >> "$GITHUB_ENV"
+          UNDERSCORED_TRIPLE=$(sed 's/-/_/g' <<< "${{ inputs.triple }}")
+          echo "AR_$UNDERSCORED_TRIPLE=llvm-ar" >> "$GITHUB_ENV"
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
