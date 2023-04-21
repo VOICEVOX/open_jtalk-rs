@@ -79,15 +79,15 @@ jobs:
           sudo apt update
           sudo apt install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
       - uses: nttld/setup-ndk@v1
-        if: endsWith(inputs.triple, '-linux-android')
+        if: endsWith(matrix.target, '-linux-android')
         with:
           ndk-version: r25b
       - name: Set path for android
-        if: endsWith(inputs.triple, '-linux-android')
+        if: endsWith(matrix.target, '-linux-android')
         shell: bash
         run: |
           echo "$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin" >> "$GITHUB_PATH"
-          UNDERSCORED_TRIPLE=$(sed 's/-/_/g' <<< "${{ inputs.triple }}")
+          UNDERSCORED_TRIPLE=$(sed 's/-/_/g' <<< "${{ mattix.target }}")
           echo "AR_$UNDERSCORED_TRIPLE=llvm-ar" >> "$GITHUB_ENV"
       - uses: dtolnay/rust-toolchain@stable
         with:
