@@ -32,7 +32,7 @@ runs:
     - name: install triple
       run: rustup target add ${{ inputs.triple }}
       shell: bash
-    - uses: Swatinem/rust-cache@v1
+    - uses: Swatinem/rust-cache@v2
       with:
         # cargoのキャシュが原因でテストが失敗してることが考えられる場合はバージョン部分を変更する
         key: "v1-cargo-test-cache-${{ inputs.triple }}"
