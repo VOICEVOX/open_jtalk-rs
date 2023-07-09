@@ -47,7 +47,11 @@ impl Mecab {
             ))
         }
     }
-    pub fn load_with_userdic(&mut self, dic_dir: impl AsRef<Path>, userdic: impl AsRef<Path>) -> bool {
+    pub fn load_with_userdic(
+        &mut self,
+        dic_dir: impl AsRef<Path>,
+        userdic: impl AsRef<Path>,
+    ) -> bool {
         let dic_dir = CString::new(dic_dir.as_ref().to_str().unwrap()).unwrap();
         let userdic = CString::new(userdic.as_ref().to_str().unwrap()).unwrap();
         unsafe {
