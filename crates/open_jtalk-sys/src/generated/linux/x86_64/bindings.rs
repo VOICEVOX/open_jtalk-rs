@@ -2250,6 +2250,13 @@ extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
+    pub fn Mecab_load_with_userdic(
+        m: *mut Mecab,
+        dicdir: *const ::std::os::raw::c_char,
+        userdic: *const ::std::os::raw::c_char,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
     pub fn Mecab_analysis(
         m: *mut Mecab,
         str_: *const ::std::os::raw::c_char,
