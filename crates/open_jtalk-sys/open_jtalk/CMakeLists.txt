@@ -4,8 +4,8 @@ project(OpenJtalkSys)
 include(FetchContent)
 FetchContent_Declare(
   openjtalk
-  GIT_REPOSITORY https://github.com/sevenc-nanashi/open_jtalk.git
-  GIT_TAG add/mecab_load_with_userdic
+  GIT_REPOSITORY https://github.com/voicevox/open_jtalk.git
+  GIT_TAG 1.11
   SOURCE_SUBDIR src)
 FetchContent_MakeAvailable(openjtalk)
 
