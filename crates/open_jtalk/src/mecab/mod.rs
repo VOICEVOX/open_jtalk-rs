@@ -55,8 +55,8 @@ impl Mecab {
     /// - `dic_dir`または`userdic`が`\0`を含む。
     /// - `dic_dir`または`userdic`がUTF-8の文字列ではない。
     pub fn load_with_userdic(&mut self, dic_dir: &Path, userdic: Option<&Path>) -> bool {
+        let dic_dir = CString::new(dic_dir.to_str().unwrap()).unwrap();
         if let Some(userdic) = userdic {
-            let dic_dir = CString::new(dic_dir.to_str().unwrap()).unwrap();
             let userdic = CString::new(userdic.to_str().unwrap()).unwrap();
             unsafe {
                 bool_number_to_bool(open_jtalk_sys::Mecab_load_with_userdic(
@@ -66,7 +66,13 @@ impl Mecab {
                 ))
             }
         } else {
-            self.load(dic_dir)
+            unsafe {
+                bool_number_to_bool(open_jtalk_sys::Mecab_load_with_userdic(
+                    self.as_raw_ptr(),
+                    dic_dir.as_ptr(),
+                    std::ptr::null(),
+                ))
+            }
         }
     }
     pub fn get_feature(&self) -> Option<&MecabFeature> {
