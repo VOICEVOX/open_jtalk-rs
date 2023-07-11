@@ -47,6 +47,12 @@ impl Mecab {
             ))
         }
     }
+    /// # Panics
+    /// 
+    /// 次の場合にパニックする。
+    ///
+    /// - `dic_dir`または`userdic`が`\0`を含む。
+    /// - `dic_dir`または`userdic`がUTF-8の文字列ではない。
     pub fn load_with_userdic(
         &mut self,
         dic_dir: impl AsRef<Path>,
