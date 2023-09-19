@@ -1,9 +1,11 @@
 use std::{
-    env,
+    env, fs,
+    io::BufRead,
     path::{Path, PathBuf},
-    process::Command,
+    process::{Command, Stdio},
     str,
 };
+
 fn main() {
     let mut cmake_conf = cmake::Config::new("open_jtalk");
     let target = env::var("TARGET").unwrap();
@@ -60,6 +62,10 @@ fn main() {
         }
     }
 
+    if target.contains("emscripten") {
+        include_dirs.extend(search_emscripten_include_directories());
+    }
+
     let dst_dir = cmake_conf.build();
     let lib_dir = dst_dir.join("lib");
     println!("cargo:rustc-link-search={}", lib_dir.to_str().unwrap());
@@ -85,6 +91,7 @@ fn generate_bindings(
         .into_iter()
         .map(|dir| format!("-I{}", dir.as_ref().to_str().unwrap()))
         .chain([format!("-I{}", include_dir.to_str().unwrap())])
+        .chain(["-fvisibility=default".to_string()])
         .collect::<Vec<_>>();
     println!("cargo:rerun-if-changed=wrapper.hpp");
     println!("cargo:rerun-if-changed=src/generated/bindings.rs");
@@ -117,4 +124,34 @@ fn generate_bindings(
     bindings
         .write_to_file(&generated_file)
         .expect("Couldn't write bindings!");
+}
+
+fn search_emscripten_include_directories() -> impl IntoIterator<Item = PathBuf> {
+    let empty_cpp_path = Path::new(&env::var_os("OUT_DIR").unwrap()).join("empty.cpp");
+    fs::write(&empty_cpp_path, b"").unwrap();
+
+    let mut command;
+    if cfg!(target_os = "windows") {
+        command = Command::new("cmd");
+        command.arg("/C");
+    } else {
+        command = Command::new("sh");
+        command.arg("-c");
+    };
+
+    let empp_output = command
+        .arg(format!("em++ --verbose {}", empty_cpp_path.display()))
+        .stderr(Stdio::piped())
+        .output()
+        .unwrap();
+
+    empp_output
+        .stderr
+        .lines()
+        .map(Result::unwrap)
+        .skip_while(|line| line.trim() != "#include <...> search starts here:")
+        .skip(1)
+        .take_while(|line| line.trim() != "End of search list.")
+        .map(|line| PathBuf::from(line.trim()))
+        .collect::<Vec<_>>()
 }
