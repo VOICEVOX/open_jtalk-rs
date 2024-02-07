@@ -95,7 +95,7 @@ fn generate_bindings(
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         .size_t_is_usize(true)
         .rustfmt_bindings(true)
-        .rustified_enum("*");
+        .rustified_enum(".*");
     let paths = std::fs::read_dir(include_dir).unwrap();
     for path in paths {
         let path = path.unwrap();
