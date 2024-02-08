@@ -4,6 +4,7 @@ version = "0.1.25"
 edition = "2021"
 
 [dependencies]
+camino = "1.1.6"
 open_jtalk-sys = { path = "../open_jtalk-sys", version = "0.16.111" }
 thiserror = "1.0.31"
 
