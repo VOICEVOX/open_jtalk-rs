@@ -10,7 +10,7 @@ use std::{ffi::CString, mem::MaybeUninit};
 pub enum MecabLoadError {
     #[error("`{function}` failed")]
     Unsuccessful { function: &'static str },
-    #[error("file name contained an NUL byte: {filename:?}")]
+    #[error("file name contained a NUL byte: {filename:?}")]
     Nul { filename: Utf8PathBuf },
 }
 
