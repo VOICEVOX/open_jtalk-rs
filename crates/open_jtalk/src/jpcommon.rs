@@ -32,6 +32,9 @@ unsafe impl resources::Resource for JpCommon {
     }
 }
 
+// SAFETY: `Send`と対立する性質はないはず。
+unsafe impl Send for JpCommon {}
+
 impl<'a> Iterator for JpCommonLabelFeatureIter<'a> {
     type Item = &'a str;
     fn next(&mut self) -> Option<Self::Item> {
