@@ -1,2 +1,3 @@
 [workspace]
 members = ["crates/open_jtalk-sys", "crates/open_jtalk"]
+resolver = "2"
