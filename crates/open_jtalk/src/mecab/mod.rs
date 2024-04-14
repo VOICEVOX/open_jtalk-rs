@@ -39,6 +39,9 @@ unsafe impl resources::Resource for Mecab {
     }
 }
 
+// SAFETY: `Send`と対立する性質はないはず。
+unsafe impl Send for Mecab {}
+
 impl Mecab {
     unsafe fn as_raw_ptr(&self) -> *mut open_jtalk_sys::Mecab {
         if self.0.is_none() {

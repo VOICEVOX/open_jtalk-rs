@@ -24,6 +24,9 @@ unsafe impl resources::Resource for Njd {
     }
 }
 
+// SAFETY: `Send`と対立する性質はないはず。
+unsafe impl Send for Njd {}
+
 impl Njd {
     pub(crate) unsafe fn as_raw_ptr(&self) -> *mut open_jtalk_sys::NJD {
         if self.0.is_none() {
