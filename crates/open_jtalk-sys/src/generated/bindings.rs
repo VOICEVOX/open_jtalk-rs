@@ -57,3 +57,9 @@ include!(concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/src/generated/android/aarch64/bindings.rs"
 ));
+
+#[cfg(all(target_os = "emscripten", target_arch = "wasm32"))]
+include!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/src/generated/emscripten/wasm32/bindings.rs"
+));
