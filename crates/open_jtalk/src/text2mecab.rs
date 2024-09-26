@@ -38,7 +38,9 @@ pub fn text2mecab(input: impl AsRef<str>) -> Result<String, Text2MecabError> {
 
         Ok(String::from_utf8(output).unwrap())
     } else {
-        Err(unsafe { std::mem::transmute(result) })
+        Err(unsafe {
+            std::mem::transmute::<open_jtalk_sys::text2mecab_result_t, Text2MecabError>(result)
+        })
     }
 }
 
