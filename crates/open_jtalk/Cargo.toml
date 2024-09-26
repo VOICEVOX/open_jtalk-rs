@@ -2,6 +2,7 @@
 name = "open_jtalk"
 version = "0.1.25"
 edition = "2021"
+license = "BSD-3-Clause"
 
 [dependencies]
 camino = "1.1.6"
