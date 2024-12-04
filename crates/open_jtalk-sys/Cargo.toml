@@ -2,6 +2,7 @@
 name = "open_jtalk-sys"
 version = "0.16.111"
 edition = "2021"
+license = "BSD-3-Clause"
 
 [features]
 default = []
