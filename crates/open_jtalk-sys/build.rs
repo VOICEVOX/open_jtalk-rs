@@ -92,9 +92,9 @@ fn generate_bindings(
         .header("wrapper.hpp")
         .allowlist_recursively(true)
         .clang_args(clang_args)
-        .parse_callbacks(Box::new(bindgen::CargoCallbacks))
+        .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
         .size_t_is_usize(true)
-        .rustfmt_bindings(true)
+        .formatter(bindgen::Formatter::Prettyplease)
         .rustified_enum(".*");
     let paths = std::fs::read_dir(include_dir).unwrap();
     for path in paths {
