@@ -1,5 +1,13 @@
+use std::{
+    ffi::c_int,
+    mem::{self, MaybeUninit},
+    os::raw::c_char,
+    ptr::{self, NonNull},
+};
+
 use super::*;
-use std::{mem::MaybeUninit, os::raw::c_char};
+
+pub use self::string::LibcUtf8String;
 
 #[derive(Default)]
 pub struct Njd(Option<open_jtalk_sys::NJD>);
@@ -70,6 +78,233 @@ impl Njd {
                 mecab_feature as *const MecabFeature as *mut *mut c_char,
                 mecab_feature_size,
             )
+        }
+    }
+
+    pub fn update(&mut self, f: impl FnOnce(Vec<NjdNode>) -> Vec<NjdNode>) {
+        let this = unsafe { self.as_raw_ptr() };
+        let mut this = NonNull::new(this).expect("should have been checked");
+        if !this.is_aligned() {
+            unimplemented!("unaligned");
+        }
+
+        let nodes = {
+            let mut nodes =
+                Vec::with_capacity(unsafe { open_jtalk_sys::NJD_get_size(this.as_ptr()) } as _);
+
+            unsafe {
+                let this = this.as_mut();
+                while let Some(head) = NonNull::new(this.head) {
+                    if !head.is_aligned() {
+                        unimplemented!("unaligned");
+                    }
+                    let &open_jtalk_sys::NJDNode { next, .. } = head.as_ref();
+                    nodes.push(NjdNode::from_raw(head));
+                    this.head = next;
+                }
+                // `this.tail`がダングリングになるが、大丈夫なはず
+            }
+
+            nodes
+        };
+
+        let nodes = f(nodes);
+        for node in nodes {
+            let node = node.into_raw();
+            unsafe { open_jtalk_sys::NJD_push_node(this.as_ptr(), node.as_ptr()) };
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct NjdNode {
+    pub string: Option<LibcUtf8String>,
+    pub pos: Option<LibcUtf8String>,
+    pub pos_group1: Option<LibcUtf8String>,
+    pub pos_group2: Option<LibcUtf8String>,
+    pub pos_group3: Option<LibcUtf8String>,
+    pub ctype: Option<LibcUtf8String>,
+    pub cform: Option<LibcUtf8String>,
+    pub orig: Option<LibcUtf8String>,
+    pub read: Option<LibcUtf8String>,
+    pub pron: Option<LibcUtf8String>,
+    pub acc: c_int,
+    pub mora_size: c_int,
+    pub chain_rule: Option<LibcUtf8String>,
+    pub chain_flag: c_int,
+}
+
+impl NjdNode {
+    unsafe fn from_raw(raw: NonNull<open_jtalk_sys::NJDNode>) -> Self {
+        if !raw.is_aligned() {
+            unimplemented!("unaligned");
+        }
+
+        let open_jtalk_sys::NJDNode {
+            string,
+            pos,
+            pos_group1,
+            pos_group2,
+            pos_group3,
+            ctype,
+            cform,
+            orig,
+            read,
+            pron,
+            acc,
+            mora_size,
+            chain_rule,
+            chain_flag,
+            prev: _,
+            next: _,
+        } = raw.read();
+
+        let this = Self {
+            string: from_raw(string),
+            pos: from_raw(pos),
+            pos_group1: from_raw(pos_group1),
+            pos_group2: from_raw(pos_group2),
+            pos_group3: from_raw(pos_group3),
+            ctype: from_raw(ctype),
+            cform: from_raw(cform),
+            orig: from_raw(orig),
+            read: from_raw(read),
+            pron: from_raw(pron),
+            acc,
+            mora_size,
+            chain_rule: from_raw(chain_rule),
+            chain_flag,
+        };
+
+        unsafe { libc::free(raw.as_ptr() as *mut _) };
+
+        return this;
+
+        fn from_raw(s: *mut c_char) -> Option<LibcUtf8String> {
+            NonNull::new(s).map(LibcUtf8String::from_raw)
+        }
+    }
+
+    fn into_raw(self) -> NonNull<open_jtalk_sys::NJDNode> {
+        let Self {
+            string,
+            pos,
+            pos_group1,
+            pos_group2,
+            pos_group3,
+            ctype,
+            cform,
+            orig,
+            read,
+            pron,
+            acc,
+            mora_size,
+            chain_rule,
+            chain_flag,
+        } = self;
+
+        let raw = open_jtalk_sys::NJDNode {
+            string: into_raw(string),
+            pos: into_raw(pos),
+            pos_group1: into_raw(pos_group1),
+            pos_group2: into_raw(pos_group2),
+            pos_group3: into_raw(pos_group3),
+            ctype: into_raw(ctype),
+            cform: into_raw(cform),
+            orig: into_raw(orig),
+            read: into_raw(read),
+            pron: into_raw(pron),
+            acc,
+            mora_size,
+            chain_rule: into_raw(chain_rule),
+            chain_flag,
+            prev: ptr::null_mut(),
+            next: ptr::null_mut(),
+        };
+
+        return unsafe {
+            let buf = libc::malloc(mem::size_of::<open_jtalk_sys::NJDNode>())
+                as *mut open_jtalk_sys::NJDNode;
+            let mut buf = NonNull::new(buf).unwrap_or_else(|| panic!("`malloc` failed"));
+            if !buf.is_aligned() {
+                panic!("unaligned");
+            }
+            open_jtalk_sys::NJDNode_initialize(buf.as_ptr());
+            *buf.as_mut() = raw;
+            buf
+        };
+
+        fn into_raw(s: Option<LibcUtf8String>) -> *mut c_char {
+            s.map(LibcUtf8String::into_raw).unwrap_or_default()
+        }
+    }
+}
+
+mod string {
+    use std::{
+        ffi::{c_char, CStr},
+        fmt::{self, Debug, Formatter},
+        mem,
+        ptr::NonNull,
+    };
+
+    pub struct LibcUtf8String(NonNull<c_char>);
+
+    impl LibcUtf8String {
+        /// Creates a new `LibcUtf8String`.
+        ///
+        /// # Panics
+        ///
+        /// Panics if `s` contains nul bytes.
+        pub fn new(s: &str) -> Self {
+            if s.as_bytes().contains(&b'\0') {
+                panic!("must not contain nul bytes");
+            }
+            unsafe {
+                let buf = libc::malloc(s.len() + 1) as *mut u8;
+                let buf = NonNull::new(buf).expect("`malloc` failed");
+                buf.copy_from_nonoverlapping(NonNull::new(s.as_ptr() as *mut _).unwrap(), s.len());
+                buf.add(s.len()).write(b'\0');
+                Self(buf.cast())
+            }
+        }
+
+        pub(super) fn from_raw(raw: NonNull<c_char>) -> Self {
+            Self(raw)
+        }
+
+        pub(super) fn into_raw(self) -> *mut c_char {
+            let Self(raw) = self;
+            mem::forget(self);
+            raw.as_ptr()
+        }
+
+        fn as_str(&self) -> &str {
+            unsafe { CStr::from_ptr(self.0.as_ptr()) }.to_str().unwrap()
+        }
+    }
+
+    impl Drop for LibcUtf8String {
+        fn drop(&mut self) {
+            unsafe { libc::free(self.0.as_ptr() as *mut _) }
+        }
+    }
+
+    impl AsRef<str> for LibcUtf8String {
+        fn as_ref(&self) -> &str {
+            self.as_str()
+        }
+    }
+
+    impl PartialEq<str> for LibcUtf8String {
+        fn eq(&self, other: &str) -> bool {
+            self.as_str() == other
+        }
+    }
+
+    impl Debug for LibcUtf8String {
+        fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+            write!(f, "{:?}", self.as_str())
         }
     }
 }
