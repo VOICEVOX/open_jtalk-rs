@@ -84,25 +84,22 @@ impl Njd {
     pub fn update(&mut self, f: impl FnOnce(Vec<NjdNode>) -> Vec<NjdNode>) {
         let this = unsafe { self.as_raw_ptr() };
         let mut this = NonNull::new(this).expect("should have been checked");
-        if !this.is_aligned() {
-            unimplemented!("unaligned");
-        }
 
         let nodes = {
             let mut nodes =
                 Vec::with_capacity(unsafe { open_jtalk_sys::NJD_get_size(this.as_ptr()) } as _);
 
             unsafe {
+                const _: () =
+                    assert!(mem::align_of::<open_jtalk_sys::NJD>() == mem::size_of::<usize>());
+
                 let this = this.as_mut();
                 while let Some(head) = NonNull::new(this.head) {
-                    if !head.is_aligned() {
-                        unimplemented!("unaligned");
-                    }
                     let &open_jtalk_sys::NJDNode { next, .. } = head.as_ref();
                     nodes.push(NjdNode::from_raw(head));
                     this.head = next;
                 }
-                // `this.tail`がダングリングになるが、大丈夫なはず
+                // `this->tail`がダングリングになるが、大丈夫なはず
             }
 
             nodes
@@ -136,9 +133,8 @@ pub struct NjdNode {
 
 impl NjdNode {
     unsafe fn from_raw(raw: NonNull<open_jtalk_sys::NJDNode>) -> Self {
-        if !raw.is_aligned() {
-            unimplemented!("unaligned");
-        }
+        const _: () =
+            assert!(mem::align_of::<open_jtalk_sys::NJDNode>() == mem::size_of::<usize>());
 
         let open_jtalk_sys::NJDNode {
             string,
@@ -157,7 +153,7 @@ impl NjdNode {
             chain_flag,
             prev: _,
             next: _,
-        } = raw.read();
+        } = unsafe { raw.read() };
 
         let this = Self {
             string: from_raw(string),
@@ -223,12 +219,12 @@ impl NjdNode {
         };
 
         return unsafe {
+            const _: () =
+                assert!(mem::align_of::<open_jtalk_sys::NJDNode>() == mem::size_of::<usize>());
+
             let buf = libc::malloc(mem::size_of::<open_jtalk_sys::NJDNode>())
                 as *mut open_jtalk_sys::NJDNode;
             let mut buf = NonNull::new(buf).unwrap_or_else(|| panic!("`malloc` failed"));
-            if !buf.is_aligned() {
-                panic!("unaligned");
-            }
             open_jtalk_sys::NJDNode_initialize(buf.as_ptr());
             *buf.as_mut() = raw;
             buf
