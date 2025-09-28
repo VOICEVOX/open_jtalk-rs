@@ -59,6 +59,8 @@ jobs:
             target: aarch64-linux-android
           - os: ubuntu-latest
             target: x86_64-linux-android
+          - os: ubuntu-latest
+            target: wasm32-unknown-emscripten
           - os: macos-latest
             target: aarch64-apple-darwin
           - os: macos-latest
@@ -73,6 +75,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       # FIXME: auto_gen_bind_prにも処理があるので共通化する
+      - name: Install emscripten
+        if: matrix.target == 'wasm32-unknown-emscripten'
+        uses: mymindstorm/setup-emsdk@v12
       - name: Install cross compiler for linux aarch64
         if: matrix.target == 'aarch64-unknown-linux-gnu'
         shell: bash

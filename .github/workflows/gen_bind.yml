@@ -27,6 +27,8 @@ jobs:
             triple: aarch64-linux-android
           - os: ubuntu-latest
             triple: x86_64-linux-android
+          - os: ubuntu-latest
+            triple: wasm32-unknown-emscripten
           - os: macos-latest
             triple: x86_64-apple-darwin
           - os: macos-latest
