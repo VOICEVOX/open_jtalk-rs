@@ -245,9 +245,11 @@ impl NjdNode {
 
         let buf = malloc(mem::size_of::<open_jtalk_sys::NJDNode>()).cast();
         unsafe {
-            // SAFETY: `malloc` correctly allocates enough memory.
-            const _: () =
-                assert!(mem::align_of::<open_jtalk_sys::NJDNode>() == mem::size_of::<usize>());
+            // SAFETY: `malloc` correctly allocates enough aligned memory.
+            const _: () = assert!(
+                mem::align_of::<open_jtalk_sys::NJDNode>() <= mem::size_of::<usize>()
+                    || mem::align_of::<open_jtalk_sys::NJDNode>() <= mem::size_of::<c_int>()
+            );
             buf.write(raw);
         }
         return buf;
