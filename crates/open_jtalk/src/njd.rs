@@ -9,7 +9,7 @@ use libc::size_t;
 
 use super::*;
 
-pub use self::string::LibcUtf8String;
+pub use self::string::Utf8LibcString;
 
 #[derive(Default)]
 pub struct Njd(Option<open_jtalk_sys::NJD>);
@@ -135,19 +135,19 @@ impl Njd {
 
 #[derive(Debug)]
 pub struct NjdNode {
-    pub string: Option<LibcUtf8String>,
-    pub pos: Option<LibcUtf8String>,
-    pub pos_group1: Option<LibcUtf8String>,
-    pub pos_group2: Option<LibcUtf8String>,
-    pub pos_group3: Option<LibcUtf8String>,
-    pub ctype: Option<LibcUtf8String>,
-    pub cform: Option<LibcUtf8String>,
-    pub orig: Option<LibcUtf8String>,
-    pub read: Option<LibcUtf8String>,
-    pub pron: Option<LibcUtf8String>,
+    pub string: Option<Utf8LibcString>,
+    pub pos: Option<Utf8LibcString>,
+    pub pos_group1: Option<Utf8LibcString>,
+    pub pos_group2: Option<Utf8LibcString>,
+    pub pos_group3: Option<Utf8LibcString>,
+    pub ctype: Option<Utf8LibcString>,
+    pub cform: Option<Utf8LibcString>,
+    pub orig: Option<Utf8LibcString>,
+    pub read: Option<Utf8LibcString>,
+    pub pron: Option<Utf8LibcString>,
     pub acc: c_int,
     pub mora_size: c_int,
-    pub chain_rule: Option<LibcUtf8String>,
+    pub chain_rule: Option<Utf8LibcString>,
     pub chain_flag: c_int,
 }
 
@@ -201,8 +201,8 @@ impl NjdNode {
 
         return this;
 
-        fn from_raw(s: *mut c_char) -> Option<LibcUtf8String> {
-            NonNull::new(s).map(LibcUtf8String::from_raw)
+        fn from_raw(s: *mut c_char) -> Option<Utf8LibcString> {
+            NonNull::new(s).map(Utf8LibcString::from_raw)
         }
     }
 
@@ -252,8 +252,8 @@ impl NjdNode {
         }
         return buf;
 
-        fn into_raw(s: Option<LibcUtf8String>) -> *mut c_char {
-            s.map(LibcUtf8String::into_raw).unwrap_or_default()
+        fn into_raw(s: Option<Utf8LibcString>) -> *mut c_char {
+            s.map(Utf8LibcString::into_raw).unwrap_or_default()
         }
     }
 }
@@ -273,10 +273,10 @@ mod string {
         ptr::NonNull,
     };
 
-    pub struct LibcUtf8String(NonNull<c_char>);
+    pub struct Utf8LibcString(NonNull<c_char>);
 
-    impl LibcUtf8String {
-        /// Creates a new `LibcUtf8String`.
+    impl Utf8LibcString {
+        /// Creates a new `Utf8LibcString`.
         ///
         /// # Panics
         ///
@@ -314,7 +314,7 @@ mod string {
         }
     }
 
-    impl Drop for LibcUtf8String {
+    impl Drop for Utf8LibcString {
         fn drop(&mut self) {
             // SAFETY: `self.0` is valid, and is exposed only in `Self::as_str`, `Self::into_raw`,
             // and this `Drop` implementation.
@@ -322,19 +322,19 @@ mod string {
         }
     }
 
-    impl AsRef<str> for LibcUtf8String {
+    impl AsRef<str> for Utf8LibcString {
         fn as_ref(&self) -> &str {
             self.as_str()
         }
     }
 
-    impl PartialEq<str> for LibcUtf8String {
+    impl PartialEq<str> for Utf8LibcString {
         fn eq(&self, other: &str) -> bool {
             self.as_str() == other
         }
     }
 
-    impl Debug for LibcUtf8String {
+    impl Debug for Utf8LibcString {
         fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
             write!(f, "{:?}", self.as_str())
         }
