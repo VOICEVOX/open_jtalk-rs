@@ -84,24 +84,37 @@ impl Njd {
     }
 
     pub fn update(&mut self, f: impl FnOnce(Vec<NjdNode>) -> Vec<NjdNode>) {
+        // SAFETY: ?
         let this = unsafe { self.as_raw_ptr() };
         let mut this = NonNull::new(this).expect("should have been checked");
 
         let nodes = {
+            // SAFETY: `this` is valid at this point.
             let mut nodes =
                 Vec::with_capacity(unsafe { open_jtalk_sys::NJD_get_size(this.as_ptr()) } as _);
 
-            unsafe {
+            let this = unsafe {
+                // SAFETY: `raw` should be valid for read/write since `&mut self` is held and all
+                // other functions should not leave `this` broken. It should be also aligned
+                // because it comes from `malloc`.
                 const _: () =
                     assert!(mem::align_of::<open_jtalk_sys::NJD>() == mem::size_of::<usize>());
+                this.as_mut()
+            };
 
-                let this = this.as_mut();
-                while let Some(head) = NonNull::new(this.head) {
+            while let Some(head) = NonNull::new(this.head) {
+                unsafe {
+                    // SAFETY: Only Open JTalk should set `NJD::head` and `NJDNode::next`, therefore
+                    // the `*NJDNode` should be valid and aligned.
+
+                    const _: () = assert!(
+                        mem::align_of::<open_jtalk_sys::NJDNode>() == mem::size_of::<usize>()
+                    );
+
                     let &open_jtalk_sys::NJDNode { next, .. } = head.as_ref();
                     nodes.push(NjdNode::from_raw(head));
                     this.head = next;
                 }
-                // `this->tail`がダングリングになるが、大丈夫なはず
             }
 
             nodes
@@ -110,6 +123,11 @@ impl Njd {
         let nodes = f(nodes);
         for node in nodes {
             let node = node.into_raw();
+            // SAFETY:
+            // - At beginning of the loop, `this` is a empty list that `NJD_push_node` can
+            //   safely push first `node`. `this->tail` is dangling, however `NJD_push_node` does
+            //   not see it. For second or later time, `this` is a valid bidirectional linked list.
+            // - `NjdNode::into_raw` returns a valid `NJDNode` that Open JTalk can handle.
             unsafe { open_jtalk_sys::NJD_push_node(this.as_ptr(), node.as_ptr()) };
         }
     }
@@ -134,10 +152,11 @@ pub struct NjdNode {
 }
 
 impl NjdNode {
+    /// # Safety
+    ///
+    /// - `ptr::read` must be able to be performed for `raw`.
+    /// - You must not use `raw` after calling this function.
     unsafe fn from_raw(raw: NonNull<open_jtalk_sys::NJDNode>) -> Self {
-        const _: () =
-            assert!(mem::align_of::<open_jtalk_sys::NJDNode>() == mem::size_of::<usize>());
-
         let open_jtalk_sys::NJDNode {
             string,
             pos,
@@ -155,7 +174,10 @@ impl NjdNode {
             chain_flag,
             prev: _,
             next: _,
-        } = unsafe { raw.read() };
+        } = unsafe {
+            // SAFETY: The safety contract must be upheld by the caller.
+            raw.read()
+        };
 
         let this = Self {
             string: from_raw(string),
@@ -174,6 +196,7 @@ impl NjdNode {
             chain_flag,
         };
 
+        // SAFETY: The safety contract must be upheld by the caller.
         unsafe { libc::free(raw.as_ptr() as *mut _) };
 
         return this;
@@ -220,15 +243,14 @@ impl NjdNode {
             next: ptr::null_mut(),
         };
 
-        return unsafe {
+        let buf = malloc(mem::size_of::<open_jtalk_sys::NJDNode>()).cast();
+        unsafe {
+            // SAFETY: `malloc` correctly allocates enough memory.
             const _: () =
                 assert!(mem::align_of::<open_jtalk_sys::NJDNode>() == mem::size_of::<usize>());
-
-            let buf = malloc(mem::size_of::<open_jtalk_sys::NJDNode>()).cast();
-            open_jtalk_sys::NJDNode_initialize(buf.as_ptr());
             buf.write(raw);
-            buf
-        };
+        }
+        return buf;
 
         fn into_raw(s: Option<LibcUtf8String>) -> *mut c_char {
             s.map(LibcUtf8String::into_raw).unwrap_or_default()
@@ -237,7 +259,7 @@ impl NjdNode {
 }
 
 fn malloc(size: size_t) -> NonNull<c_void> {
-    // SAFETY: `malloc` does require nothing.
+    // SAFETY: `malloc` itself does require nothing.
     let buf = unsafe { libc::malloc(size) };
 
     NonNull::new(buf).unwrap_or_else(|| panic!("`malloc` failed"))
@@ -263,12 +285,13 @@ mod string {
             if s.as_bytes().contains(&b'\0') {
                 panic!("must not contain nul bytes");
             }
-            return unsafe {
-                let buf = super::malloc(s.len() + 1).cast::<u8>();
+            let buf = super::malloc(s.len() + 1).cast::<u8>();
+            unsafe {
+                // SAFETY: `malloc` allocates `s.len() + 1` bytes correctly.
                 buf.copy_from_nonoverlapping(as_non_null_ptr(s), s.len());
                 buf.add(s.len()).write(b'\0');
-                Self(buf.cast())
-            };
+            }
+            return Self(buf.cast());
 
             fn as_non_null_ptr(s: &str) -> NonNull<u8> {
                 NonNull::new(s.as_ptr() as *mut _).expect("should be always non-null")
@@ -286,12 +309,15 @@ mod string {
         }
 
         fn as_str(&self) -> &str {
+            // SAFETY: `self.0` is valid until `self` is dropped.
             unsafe { CStr::from_ptr(self.0.as_ptr()) }.to_str().unwrap()
         }
     }
 
     impl Drop for LibcUtf8String {
         fn drop(&mut self) {
+            // SAFETY: `self.0` is valid, and is exposed only in `Self::as_str`, `Self::into_raw`,
+            // and this `Drop` implementation.
             unsafe { libc::free(self.0.as_ptr() as *mut _) }
         }
     }
