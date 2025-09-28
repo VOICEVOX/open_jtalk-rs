@@ -6,6 +6,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy,rustfmt
       - uses: Swatinem/rust-cache@v1
       - run: cargo clippy --all-features --tests -- -D clippy::all -D warnings --no-deps
       - run: cargo fmt -- --check
@@ -15,12 +17,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: windows-2019
           - os: windows-2022
+          - os: windows-2025
           - os: macos-13
           - os: macos-14
-          - os: ubuntu-20.04
           - os: ubuntu-22.04
+          - os: ubuntu-24.04
     runs-on: ${{ matrix.os }}
     steps:
       - name: Install LLVM and Clang # required for bindgen to work, see https://github.com/rust-lang/rust-bindgen/issues/1797
