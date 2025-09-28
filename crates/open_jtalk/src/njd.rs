@@ -1,9 +1,11 @@
 use std::{
-    ffi::c_int,
+    ffi::{c_int, c_void},
     mem::{self, MaybeUninit},
     os::raw::c_char,
     ptr::{self, NonNull},
 };
+
+use libc::size_t;
 
 use super::*;
 
@@ -222,11 +224,9 @@ impl NjdNode {
             const _: () =
                 assert!(mem::align_of::<open_jtalk_sys::NJDNode>() == mem::size_of::<usize>());
 
-            let buf = libc::malloc(mem::size_of::<open_jtalk_sys::NJDNode>())
-                as *mut open_jtalk_sys::NJDNode;
-            let mut buf = NonNull::new(buf).unwrap_or_else(|| panic!("`malloc` failed"));
+            let buf = malloc(mem::size_of::<open_jtalk_sys::NJDNode>()).cast();
             open_jtalk_sys::NJDNode_initialize(buf.as_ptr());
-            *buf.as_mut() = raw;
+            buf.write(raw);
             buf
         };
 
@@ -234,6 +234,13 @@ impl NjdNode {
             s.map(LibcUtf8String::into_raw).unwrap_or_default()
         }
     }
+}
+
+fn malloc(size: size_t) -> NonNull<c_void> {
+    // SAFETY: `malloc` does require nothing.
+    let buf = unsafe { libc::malloc(size) };
+
+    NonNull::new(buf).unwrap_or_else(|| panic!("`malloc` failed"))
 }
 
 mod string {
@@ -256,12 +263,15 @@ mod string {
             if s.as_bytes().contains(&b'\0') {
                 panic!("must not contain nul bytes");
             }
-            unsafe {
-                let buf = libc::malloc(s.len() + 1) as *mut u8;
-                let buf = NonNull::new(buf).expect("`malloc` failed");
-                buf.copy_from_nonoverlapping(NonNull::new(s.as_ptr() as *mut _).unwrap(), s.len());
+            return unsafe {
+                let buf = super::malloc(s.len() + 1).cast::<u8>();
+                buf.copy_from_nonoverlapping(as_non_null_ptr(s), s.len());
                 buf.add(s.len()).write(b'\0');
                 Self(buf.cast())
+            };
+
+            fn as_non_null_ptr(s: &str) -> NonNull<u8> {
+                NonNull::new(s.as_ptr() as *mut _).expect("should be always non-null")
             }
         }
 
