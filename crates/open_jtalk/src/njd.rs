@@ -412,4 +412,52 @@ mod tests {
         assert!(mecab.analysis(s));
         njd.mecab2njd(mecab.get_feature().unwrap(), mecab.get_size());
     }
+
+    #[rstest]
+    fn njd_update_works() {
+        let mut njd = ManagedResource::<Njd>::initialize();
+        let mut mecab = ManagedResource::<Mecab>::initialize();
+
+        mecab
+            .load(
+                Utf8Path::new(std::env!("CARGO_MANIFEST_DIR"))
+                    .join("src/mecab/testdata/mecab_load"),
+            )
+            .unwrap();
+        let s = text2mecab("foo bar baz").unwrap();
+        assert!(mecab.analysis(s));
+        njd.mecab2njd(mecab.get_feature().unwrap(), mecab.get_size());
+        njd.update(|nodes| {
+            let [mut node1, node2, mut node3, node4, mut node5] = nodes.try_into().unwrap();
+
+            assert_eq!("ｆｏｏ", node1.string.as_ref().unwrap().as_ref());
+            assert_eq!("　", node2.string.as_ref().unwrap().as_ref());
+            assert_eq!("ｂａｒ", node3.string.as_ref().unwrap().as_ref());
+            assert_eq!("　", node4.string.as_ref().unwrap().as_ref());
+            assert_eq!("ｂａｚ", node5.string.as_ref().unwrap().as_ref());
+
+            node1.pron = Some(Utf8LibcString::new("フウ"));
+            node3.pron = Some(Utf8LibcString::new("バア"));
+            node5.pron = Some(Utf8LibcString::new("バズ"));
+
+            vec![node1, node3, node5]
+        });
+        njd.update(|nodes| {
+            let [node1, node2, node3] = <&[_; _]>::try_from(&*nodes).unwrap();
+
+            assert_eq!("フウ", node1.pron.as_ref().unwrap().as_ref());
+            assert_eq!("バア", node2.pron.as_ref().unwrap().as_ref());
+            assert_eq!("バズ", node3.pron.as_ref().unwrap().as_ref());
+
+            nodes
+        });
+        drop(njd);
+    }
+
+    #[rstest]
+    fn utf8_libc_string_works() {
+        const TEXT: &str = "こんにちは";
+        let s = Utf8LibcString::new(TEXT);
+        assert_eq!(TEXT, s.as_ref());
+    }
 }
