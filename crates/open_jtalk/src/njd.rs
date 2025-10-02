@@ -108,16 +108,18 @@ impl Njd {
             };
 
             while let Some(head) = NonNull::new(this.head) {
-                unsafe {
-                    // SAFETY: Only Open JTalk should set `NJD::head` and `NJDNode::next`, therefore
-                    // the `*NJDNode` should be valid and aligned.
+                const _: () = assert!(mem::align_of::<open_jtalk_sys::NJDNode>() <= MAX_ALIGN);
 
-                    const _: () = assert!(mem::align_of::<open_jtalk_sys::NJDNode>() <= MAX_ALIGN);
+                // SAFETY: Open JTalk should have allocated `head` with `malloc` and initialize,
+                // therefore the `*NJDNode` should be valid for read and aligned.
+                let &open_jtalk_sys::NJDNode { next, .. } = unsafe { head.as_ref() };
 
-                    let &open_jtalk_sys::NJDNode { next, .. } = head.as_ref();
-                    nodes.push(NjdNode::from_raw(head));
-                    this.head = next;
-                }
+                // SAFETY:
+                // - As stated above, Open JTalk does allocate and initialize `head`.
+                // - We don't use `head` later in this block.
+                unsafe { nodes.push(NjdNode::from_raw(head)) };
+
+                this.head = next;
             }
 
             nodes
@@ -129,7 +131,8 @@ impl Njd {
             // SAFETY:
             // - At beginning of the loop, `this` is a empty list that `NJD_push_node` can
             //   safely push first `node`. `this->tail` is dangling, however `NJD_push_node` does
-            //   not see it. For second or later time, `this` is a valid bidirectional linked list.
+            //   not see it. Even if `f` panics, no other functions should see the `tail`. For
+            //   second or later time, `this` is a valid bidirectional linked list.
             // - `NjdNode::into_raw` returns a valid `NJDNode` that Open JTalk can handle.
             unsafe { open_jtalk_sys::NJD_push_node(this.as_ptr(), node.as_ptr()) };
         }
@@ -157,7 +160,7 @@ pub struct NjdNode {
 impl NjdNode {
     /// # Safety
     ///
-    /// - `ptr::read` must be able to be performed for `raw`.
+    /// - `raw` must be come from Open JTalk.
     /// - You must not use `raw` after calling this function.
     unsafe fn from_raw(raw: NonNull<open_jtalk_sys::NJDNode>) -> Self {
         let open_jtalk_sys::NJDNode {
@@ -178,7 +181,8 @@ impl NjdNode {
             prev: _,
             next: _,
         } = unsafe {
-            // SAFETY: The safety contract must be upheld by the caller.
+            // SAFETY: Open JTalk should have allocated this with `malloc`, thus this is valid for
+            // read and aligned.
             raw.read()
         };
 
@@ -199,7 +203,7 @@ impl NjdNode {
             chain_flag,
         };
 
-        // SAFETY: The safety contract must be upheld by the caller.
+        // SAFETY: Open JTalk should have allocated this with `malloc`.
         unsafe { libc::free(raw.as_ptr() as *mut _) };
 
         return this;
