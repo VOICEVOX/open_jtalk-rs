@@ -11,6 +11,12 @@ use super::*;
 
 pub use self::string::Utf8LibcString;
 
+#[cfg(target_env = "msvc")]
+const MAX_ALIGN: usize = mem::size_of::<size_t>();
+
+#[cfg(not(target_env = "msvc"))]
+const MAX_ALIGN: usize = mem::size_of::<libc::max_align_t>();
+
 #[derive(Default)]
 pub struct Njd(Option<open_jtalk_sys::NJD>);
 
@@ -97,8 +103,7 @@ impl Njd {
                 // SAFETY: `raw` should be valid for read/write since `&mut self` is held and all
                 // other functions should not leave `this` broken. It should be also aligned
                 // because it comes from `malloc`.
-                const _: () =
-                    assert!(mem::align_of::<open_jtalk_sys::NJD>() == mem::size_of::<usize>());
+                const _: () = assert!(mem::align_of::<open_jtalk_sys::NJD>() <= MAX_ALIGN);
                 this.as_mut()
             };
 
@@ -107,9 +112,7 @@ impl Njd {
                     // SAFETY: Only Open JTalk should set `NJD::head` and `NJDNode::next`, therefore
                     // the `*NJDNode` should be valid and aligned.
 
-                    const _: () = assert!(
-                        mem::align_of::<open_jtalk_sys::NJDNode>() == mem::size_of::<usize>()
-                    );
+                    const _: () = assert!(mem::align_of::<open_jtalk_sys::NJDNode>() <= MAX_ALIGN);
 
                     let &open_jtalk_sys::NJDNode { next, .. } = head.as_ref();
                     nodes.push(NjdNode::from_raw(head));
@@ -246,10 +249,7 @@ impl NjdNode {
         let buf = malloc(mem::size_of::<open_jtalk_sys::NJDNode>()).cast();
         unsafe {
             // SAFETY: `malloc` correctly allocates enough aligned memory.
-            const _: () = assert!(
-                mem::align_of::<open_jtalk_sys::NJDNode>() <= mem::size_of::<usize>()
-                    || mem::align_of::<open_jtalk_sys::NJDNode>() <= mem::size_of::<c_int>()
-            );
+            const _: () = assert!(mem::align_of::<open_jtalk_sys::NJDNode>() <= MAX_ALIGN);
             buf.write(raw);
         }
         return buf;
