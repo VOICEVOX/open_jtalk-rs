@@ -6,7 +6,7 @@ license = "BSD-3-Clause"
 
 [dependencies]
 camino = "1.1.6"
-libc = "0.2.176"
+libc = "0.2.159"
 open_jtalk-sys = { path = "../open_jtalk-sys", version = "0.16.111" }
 thiserror = "1.0.31"
 
