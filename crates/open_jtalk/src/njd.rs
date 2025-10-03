@@ -44,6 +44,7 @@ unsafe impl resources::Resource for Njd {
 unsafe impl Send for Njd {}
 
 impl Njd {
+    // TODO: この関数自体は事前条件を持たないはずなので、`unsafe`じゃなくてもいいはず
     pub(crate) unsafe fn as_raw_ptr(&self) -> *mut open_jtalk_sys::NJD {
         if self.0.is_none() {
             panic!("uninitialized njd");
