@@ -12,10 +12,10 @@ use super::*;
 pub use self::string::Utf8LibcString;
 
 #[cfg(target_env = "msvc")]
-const MAX_ALIGN: usize = mem::size_of::<size_t>();
+const MAX_ALIGN: usize = mem::align_of::<size_t>();
 
 #[cfg(not(target_env = "msvc"))]
-const MAX_ALIGN: usize = mem::size_of::<libc::max_align_t>();
+const MAX_ALIGN: usize = mem::align_of::<libc::max_align_t>();
 
 #[derive(Default)]
 pub struct Njd(Option<open_jtalk_sys::NJD>);
