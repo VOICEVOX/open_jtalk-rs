@@ -101,8 +101,8 @@ impl Njd {
                 Vec::with_capacity(unsafe { open_jtalk_sys::NJD_get_size(this.as_ptr()) } as _);
 
             let this = unsafe {
-                // SAFETY: `raw` should be valid for read/write since `&mut self` is held and all
-                // other functions should not leave `this` broken. It should be also aligned
+                // SAFETY: `this` should be valid for write since we are holding `&mut self` here
+                // and all other functions should not leave `this` broken. It should be also aligned
                 // because it comes from `malloc`.
                 const _: () = assert!(mem::align_of::<open_jtalk_sys::NJD>() <= MAX_ALIGN);
                 this.as_mut()
