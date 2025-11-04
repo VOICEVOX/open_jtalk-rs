@@ -260,7 +260,8 @@ impl NjdNode {
         return buf;
 
         fn into_raw(s: Option<Utf8LibcString>) -> *mut c_char {
-            s.map(Utf8LibcString::into_raw).unwrap_or_default()
+            // TODO: Rust 1.88以降にしたら`unwrap_or_default`に
+            s.map(Utf8LibcString::into_raw).unwrap_or(ptr::null_mut())
         }
     }
 }
