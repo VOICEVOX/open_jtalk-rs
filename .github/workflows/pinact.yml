@@ -2,7 +2,11 @@ name: Check pinact
 
 on:
   push:
+    paths:
+      - ".github/**"
   pull_request:
+    paths:
+      - ".github/**"
 
 jobs:
   pinact:
