@@ -39,7 +39,7 @@ jobs:
             triple: x86_64-apple-ios
     runs-on: ${{ matrix.target.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
         with:
           ref: ${{ github.head_ref }}
       - uses: ./.github/actions/auto_gen_bind_pr
