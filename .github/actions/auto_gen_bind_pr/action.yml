@@ -17,7 +17,7 @@ runs:
       run: |
         sudo apt update
         sudo apt install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
-    - uses: nttld/setup-ndk@v1
+    - uses: nttld/setup-ndk@ed92fe6cadad69be94a966a7ee3271275e62f779 # v1.6.0
       if: endsWith(inputs.triple, '-linux-android')
       with:
         ndk-version: r25b
@@ -32,7 +32,7 @@ runs:
     - name: install triple
       run: rustup target add ${{ inputs.triple }}
       shell: bash
-    - uses: Swatinem/rust-cache@v2
+    - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
       with:
         # cargoのキャシュが原因でテストが失敗してることが考えられる場合はバージョン部分を変更する
         key: "v1-cargo-test-cache-${{ inputs.triple }}"
@@ -45,7 +45,7 @@ runs:
     - name: create_pr
       if: success()
       id: cpr
-      uses: peter-evans/create-pull-request@v4
+      uses: peter-evans/create-pull-request@38e0b6e68b4c852a5500a94740f0e535e0d7ba54 # v4.2.4
       with:
         commit-message: Automated generate bindings for ${{ inputs.triple }}
         branch: ${{ steps.extract_branch.outputs.branch }}_auto_gen_bindings_${{ inputs.triple }}
