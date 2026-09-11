@@ -40,11 +40,12 @@ runs:
       run: cargo build --target ${{ inputs.triple }} -p open_jtalk-sys --features generate-bindings
       shell: bash
     - name: check
+      id: check
       run: git status -s | grep -E "M|A"
       shell: bash
+      continue-on-error: true
     - name: create_pr
-      if: success()
-      id: cpr
+      if: steps.check.outcome == 'success'
       uses: peter-evans/create-pull-request@38e0b6e68b4c852a5500a94740f0e535e0d7ba54 # v4.2.4
       with:
         commit-message: Automated generate bindings for ${{ inputs.triple }}
@@ -54,7 +55,7 @@ runs:
         body: |
           Automated generate bindings for ${{ inputs.triple }}
     - name: do nothing
-      if: failure()
+      if: steps.check.outcome == 'failure'
       run: |
         echo "nothing to do. git status -s:"
         git status -s
