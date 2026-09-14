@@ -11,6 +11,9 @@ runs:
       shell: bash
       run: echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
       id: extract_branch
+    - name: Install emscripten
+      if: inputs.triple == 'wasm32-unknown-emscripten'
+      uses: mymindstorm/setup-emsdk@v12
     - name: Install cross compiler for linux aarch64
       if: inputs.triple == 'aarch64-unknown-linux-gnu'
       shell: bash
