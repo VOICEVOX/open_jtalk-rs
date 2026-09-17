@@ -6,11 +6,11 @@ license = "BSD-3-Clause"
 
 [features]
 default = []
-generate-bindings = []
+generate-bindings = ["dep:bindgen"]
 
 [build-dependencies]
 cmake = "0.1.48"
-bindgen = "0.72.0"
+bindgen = { version = "0.72.0", optional = true }
 
 [dependencies]
 link-cplusplus = "1.0.6"
