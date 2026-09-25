@@ -4,6 +4,7 @@ use std::{
     process::Command,
     str,
 };
+
 fn main() {
     let mut cmake_conf = cmake::Config::new("open_jtalk");
     let target = env::var("TARGET").unwrap();
@@ -81,11 +82,23 @@ fn generate_bindings(
     include_dirs: impl IntoIterator<Item = impl AsRef<Path>>,
 ) {
     let include_dir = allow_dir.as_ref();
-    let clang_args = include_dirs
+    let mut clang_args = include_dirs
         .into_iter()
         .map(|dir| format!("-I{}", dir.as_ref().to_str().unwrap()))
         .chain([format!("-I{}", include_dir.to_str().unwrap())])
         .collect::<Vec<_>>();
+    // emscriptenではsysrootが自動で解決されず、またデフォルトのvisibilityがhiddenで関数が出力されないため指定する
+    if env::var("TARGET").unwrap().contains("emscripten") {
+        println!("cargo:rerun-if-env-changed=EMSDK");
+        let emsdk = env::var("EMSDK").expect("EMSDK is not set. Run `source emsdk_env.sh`");
+        let sysroot = Path::new(&emsdk)
+            .join("upstream")
+            .join("emscripten")
+            .join("cache")
+            .join("sysroot");
+        clang_args.push(format!("--sysroot={}", sysroot.to_str().unwrap()));
+        clang_args.push("-fvisibility=default".to_string());
+    }
     println!("cargo:rerun-if-changed=wrapper.hpp");
     println!("cargo:rerun-if-changed=src/generated/bindings.rs");
     let mut bind_builder = bindgen::Builder::default()
