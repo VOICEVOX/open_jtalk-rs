@@ -1,19 +1,30 @@
+# 依存ライブラリを監査する。
+#
+# RustSec Advisory Databaseに登録された、あるいは単にヤンクされたクレートを検出する。
+# 検出されるものは脆弱性（`vulnerability`）のみとは限らない。
+# 依存ライブラリが単に"unmaintained"とされたりヤンクされたりしても反応する。
+
 name: Security audit
+
+# データベースへの登録とクレートのヤンクはこちらの依存ライブラリの編集と関係なく起きるため、`push`
+# と`pull_request`はトリガーにしない。
 on:
-  push:
-    paths:
-      - "**/Cargo.toml"
-      - "**/Cargo.lock"
-  pull_request:
-    paths:
-      - "**/Cargo.toml"
-      - "**/Cargo.lock"
+  workflow_dispatch:
+  schedule:
+    - cron: '0 15 * * *'
 
 jobs:
-  security_audit:
+  audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@50fbc622fc4ef5163becd7fab6573eac35f8462e # v1.2.0
-      - uses: actions-rs/audit-check@35b7b53b1e25b55642157ac01b4adceb5b9ebef3 # v1.2.0
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install cargo-binstall
+        uses: taiki-e/install-action@e67fa11c4b9316fa714ddf0abed07a0c3143b95b # v2.87.4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          tool: cargo-binstall
+      - name: Install cargo-deny
+        shell: bash
+        run: cargo binstall cargo-deny@^0.20 --no-confirm --log-level debug
+      - name: cargo-deny
+        run: cargo deny check -s advisories
